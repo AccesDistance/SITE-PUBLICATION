@@ -99,7 +99,7 @@ const IconChevronDown = () => (
 )
 
 // ─── Release Card ─────────────────────────────────────────────────────────────
-function ReleaseCard({ release, type }: { release: Release; type: 'server' | 'app' }) {
+function ReleaseCard({ release, type, repo }: { release: Release; type: 'server' | 'app'; repo: string }) {
   const [expanded, setExpanded] = useState(false)
   const mainAssets = release.assets.filter(a => !a.name.endsWith('.zip') && !a.name.endsWith('.tar.gz'))
 
@@ -144,25 +144,45 @@ function ReleaseCard({ release, type }: { release: Release; type: 'server' | 'ap
             </div>
           </div>
         </div>
-        <a
-          href={release.html_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: 'flex', alignItems: 'center', gap: '6px',
-            color: '#818cf8', fontSize: '13px', textDecoration: 'none',
-            padding: '6px 12px',
-            border: '1px solid rgba(129,140,248,0.3)',
-            borderRadius: '8px',
-            transition: 'all 0.2s',
-          }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(129,140,248,0.1)' }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
-        >
-          <IconGitHub />
-          Voir sur GitHub
-          <IconExternalLink />
-        </a>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <a
+            href={`https://github.com/${repo}/actions`}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Consulter les builds et artifacts de GitHub Actions"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              color: '#94a3b8', fontSize: '12px', textDecoration: 'none',
+              padding: '6px 10px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '8px',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#f1f5f9'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'transparent' }}
+          >
+            ⚡ Actions & Artifacts
+          </a>
+          <a
+            href={release.html_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              color: '#818cf8', fontSize: '12px', textDecoration: 'none',
+              padding: '6px 12px',
+              border: '1px solid rgba(129,140,248,0.3)',
+              borderRadius: '8px',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(129,140,248,0.1)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+          >
+            <IconGitHub />
+            Release
+            <IconExternalLink />
+          </a>
+        </div>
       </div>
 
       {/* Download buttons */}
@@ -237,50 +257,85 @@ function ReleaseCard({ release, type }: { release: Release; type: 'server' | 'ap
   )
 }
 
-// ─── Loading Skeleton ─────────────────────────────────────────────────────────
-function Skeleton() {
-  return (
-    <div style={{
-      background: 'rgba(255,255,255,0.03)',
-      border: '1px solid rgba(255,255,255,0.06)',
-      borderRadius: '16px',
-      padding: '24px',
-      animation: 'pulse 2s infinite',
-    }}>
-      <div style={{ height: '40px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', marginBottom: '16px' }} />
-      <div style={{ height: '20px', background: 'rgba(255,255,255,0.04)', borderRadius: '6px', width: '60%', marginBottom: '12px' }} />
-      <div style={{ height: '44px', background: 'rgba(255,255,255,0.04)', borderRadius: '10px', width: '180px' }} />
-    </div>
-  )
+
+
+// ─── Default fallback releases with direct download URLs ───────────────────────
+const DEFAULT_SERVER_RELEASE: Release = {
+  tag_name: 'v1.1.1',
+  name: 'Release v1.1.1',
+  published_at: new Date().toISOString(),
+  html_url: `https://github.com/${SERVER_REPO}/releases/latest`,
+  body: 'Dernière version automatique du serveur multiplateforme.\n• Windows : server-windows.exe\n• Linux : server-linux\n• macOS : server-macos',
+  assets: [
+    {
+      name: 'server-windows.exe',
+      browser_download_url: `https://github.com/${SERVER_REPO}/releases/latest/download/server-windows.exe`,
+      size: 15 * 1024 * 1024,
+    },
+    {
+      name: 'server-linux',
+      browser_download_url: `https://github.com/${SERVER_REPO}/releases/latest/download/server-linux`,
+      size: 18 * 1024 * 1024,
+    },
+    {
+      name: 'server-macos',
+      browser_download_url: `https://github.com/${SERVER_REPO}/releases/latest/download/server-macos`,
+      size: 19 * 1024 * 1024,
+    }
+  ]
+}
+
+const DEFAULT_APP_RELEASE: Release = {
+  tag_name: 'v1.1.1',
+  name: 'Release v1.1.1',
+  published_at: new Date().toISOString(),
+  html_url: `https://github.com/${APP_REPO}/releases/latest`,
+  body: 'Dernière version de l\'application mobile Flutter.\n• Contrôle tactile et curseur souris\n• Clavier virtuel et saisie texte\n• Détection automatique du réseau local',
+  assets: [
+    {
+      name: 'app-release.apk',
+      browser_download_url: `https://github.com/${APP_REPO}/releases/latest/download/app-release.apk`,
+      size: 47.8 * 1024 * 1024,
+    }
+  ]
 }
 
 // ─── Main App ─────────────────────────────────────────────────────────────────
 export default function App() {
-  const [serverRelease, setServerRelease]  = useState<Release | null>(null)
-  const [appRelease, setAppRelease]        = useState<Release | null>(null)
-  const [loadingServer, setLoadingServer]  = useState(true)
-  const [loadingApp, setLoadingApp]        = useState(true)
+  const [serverRelease, setServerRelease]  = useState<Release>(DEFAULT_SERVER_RELEASE)
+  const [appRelease, setAppRelease]        = useState<Release>(DEFAULT_APP_RELEASE)
   const [activeSection, setActiveSection]  = useState('home')
   const [scrolled, setScrolled]            = useState(false)
-  const [mobileMenu, setMobileMenu]        = useState(false)
 
-  // Fetch releases
+  // Fetch live releases from GitHub API
   useEffect(() => {
     fetch(`https://api.github.com/repos/${SERVER_REPO}/releases/latest`, {
       headers: { 'Accept': 'application/vnd.github.v3+json' }
     })
-      .then(r => r.json())
-      .then(d => { if (d.tag_name) setServerRelease(d) })
+      .then(r => {
+        if (!r.ok) throw new Error('API request failed')
+        return r.json()
+      })
+      .then(d => {
+        if (d.tag_name && d.assets && d.assets.length > 0) {
+          setServerRelease(d)
+        }
+      })
       .catch(() => {})
-      .finally(() => setLoadingServer(false))
 
     fetch(`https://api.github.com/repos/${APP_REPO}/releases/latest`, {
       headers: { 'Accept': 'application/vnd.github.v3+json' }
     })
-      .then(r => r.json())
-      .then(d => { if (d.tag_name) setAppRelease(d) })
+      .then(r => {
+        if (!r.ok) throw new Error('API request failed')
+        return r.json()
+      })
+      .then(d => {
+        if (d.tag_name && d.assets && d.assets.length > 0) {
+          setAppRelease(d)
+        }
+      })
       .catch(() => {})
-      .finally(() => setLoadingApp(false))
   }, [])
 
   // Scroll
@@ -310,7 +365,6 @@ export default function App() {
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
-    setMobileMenu(false)
   }
 
   return (
@@ -708,22 +762,7 @@ export default function App() {
                 </h3>
                 <span style={{ fontSize: '12px', color: '#64748b' }}>Windows • Linux • macOS</span>
               </div>
-              {loadingServer ? <Skeleton /> : serverRelease ? (
-                <ReleaseCard release={serverRelease} type="server" />
-              ) : (
-                <div style={{
-                  padding: '32px', textAlign: 'center',
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  borderRadius: '16px', color: '#64748b',
-                }}>
-                  <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔍</div>
-                  Aucune release disponible pour le moment.<br />
-                  <a href={`https://github.com/${SERVER_REPO}`} target="_blank" rel="noopener noreferrer" style={{ color: '#818cf8' }}>
-                    Voir le dépôt GitHub
-                  </a>
-                </div>
-              )}
+              <ReleaseCard release={serverRelease} type="server" repo={SERVER_REPO} />
             </div>
 
             {/* App */}
@@ -733,24 +772,9 @@ export default function App() {
                 <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '20px', fontWeight: 700, color: '#f1f5f9' }}>
                   Application Android
                 </h3>
-                <span style={{ fontSize: '12px', color: '#64748b' }}>APK</span>
+                <span style={{ fontSize: '12px', color: '#64748b' }}>APK Android</span>
               </div>
-              {loadingApp ? <Skeleton /> : appRelease ? (
-                <ReleaseCard release={appRelease} type="app" />
-              ) : (
-                <div style={{
-                  padding: '32px', textAlign: 'center',
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  borderRadius: '16px', color: '#64748b',
-                }}>
-                  <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔍</div>
-                  Aucune release disponible pour le moment.<br />
-                  <a href={`https://github.com/${APP_REPO}`} target="_blank" rel="noopener noreferrer" style={{ color: '#818cf8' }}>
-                    Voir le dépôt GitHub
-                  </a>
-                </div>
-              )}
+              <ReleaseCard release={appRelease} type="app" repo={APP_REPO} />
             </div>
           </div>
         </div>
