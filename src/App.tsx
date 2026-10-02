@@ -1,253 +1,534 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Pagination, Navigation, Autoplay } from 'swiper/modules'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// Import Swiper styles
+import 'swiper/css'
+import 'swiper/css/pagination'
+import 'swiper/css/navigation'
+
+// Lucide Icons
+import {
+  Monitor,
+  Smartphone,
+  Wifi,
+  Zap,
+  ShieldCheck,
+  Terminal,
+  Download,
+  ChevronDown,
+  ExternalLink,
+  CheckCircle2,
+  MousePointerClick,
+  Mouse,
+  Move,
+  ArrowUpDown,
+  Cpu,
+  Globe,
+  Mail,
+  Maximize2,
+  Keyboard,
+  Layers,
+  Copy,
+  Check,
+  Radio,
+} from 'lucide-react'
+
+// Brand Icons
+const Github = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+  </svg>
+)
+
+const Linkedin = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+  </svg>
+)
+
+const Facebook = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
+  </svg>
+)
+
+// ─── Interfaces ───────────────────────────────────────────────────────────────
+interface ReleaseAsset {
+  name: string
+  browser_download_url: string
+  size: number
+}
+
 interface Release {
   tag_name: string
   name: string
   published_at: string
   html_url: string
   body: string
-  assets: {
-    name: string
-    browser_download_url: string
-    size: number
-  }[]
+  assets: ReleaseAsset[]
 }
 
-// ─── GitHub repos config ──────────────────────────────────────────────────────
+// ─── Config ───────────────────────────────────────────────────────────────────
 const SERVER_REPO = 'AccesDistance/SERVER-SOFTWARE'
-const APP_REPO    = 'AccesDistance/APPLICATION-MOBILE'
+const APP_REPO = 'AccesDistance/APPLICATION-MOBILE'
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// Direct download fallbacks with solid direct URLs
+const DEFAULT_SERVER_RELEASE: Release = {
+  tag_name: 'v1.1.1',
+  name: 'Release v1.1.1',
+  published_at: new Date().toISOString(),
+  html_url: `https://github.com/${SERVER_REPO}/releases/latest`,
+  body: 'Version multiplateforme avec optimisation de flux vidéo JPEG 60 FPS et écoute UDP réactive.',
+  assets: [
+    {
+      name: 'server-windows.exe',
+      browser_download_url: `https://github.com/${SERVER_REPO}/releases/latest/download/server-windows.exe`,
+      size: 15.4 * 1024 * 1024,
+    },
+    {
+      name: 'server-linux',
+      browser_download_url: `https://github.com/${SERVER_REPO}/releases/latest/download/server-linux`,
+      size: 18.2 * 1024 * 1024,
+    },
+    {
+      name: 'server-macos',
+      browser_download_url: `https://github.com/${SERVER_REPO}/releases/latest/download/server-macos`,
+      size: 19.1 * 1024 * 1024,
+    },
+  ],
+}
+
+const DEFAULT_APP_RELEASE: Release = {
+  tag_name: 'v1.1.1',
+  name: 'Release v1.1.1',
+  published_at: new Date().toISOString(),
+  html_url: `https://github.com/${APP_REPO}/releases/latest`,
+  body: 'Application mobile Flutter avec contrôles tactiles fluides, clavier virtuel et mode plein écran.',
+  assets: [
+    {
+      name: 'app-release.apk',
+      browser_download_url: `https://github.com/${APP_REPO}/releases/latest/download/app-release.apk`,
+      size: 47.8 * 1024 * 1024,
+    },
+  ],
+}
+
 function formatBytes(bytes: number): string {
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('fr-FR', {
-    day: '2-digit', month: 'long', year: 'numeric',
-  })
+  try {
+    return new Date(iso).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    })
+  } catch {
+    return iso
+  }
 }
 
-function getOsIcon(assetName: string): string {
-  if (assetName.includes('windows') || assetName.endsWith('.exe')) return '🪟'
-  if (assetName.includes('linux'))  return '🐧'
-  if (assetName.includes('macos') || assetName.includes('mac')) return '🍎'
-  if (assetName.endsWith('.apk'))   return '📱'
-  return '📦'
+// ─── Flip Card Component ──────────────────────────────────────────────────────
+interface FlipCardProps {
+  title: string
+  subtitle: string
+  icon: React.ReactNode
+  backTitle: string
+  backDesc: string
+  action: string
 }
 
-function getOsLabel(assetName: string): string {
-  if (assetName.includes('windows') || assetName.endsWith('.exe')) return 'Windows'
-  if (assetName.includes('linux'))  return 'Linux'
-  if (assetName.includes('macos') || assetName.includes('mac')) return 'macOS'
-  if (assetName.endsWith('.apk'))   return 'Android APK'
-  return assetName
-}
-
-// ─── Icon SVG Components ──────────────────────────────────────────────────────
-const IconMonitor = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-  </svg>
-)
-const IconSmartphone = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="18" r="1"/>
-  </svg>
-)
-const IconWifi = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1"/>
-  </svg>
-)
-const IconZap = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-  </svg>
-)
-const IconShield = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-  </svg>
-)
-const IconCode = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
-  </svg>
-)
-const IconDownload = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-  </svg>
-)
-const IconGitHub = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
-  </svg>
-)
-const IconExternalLink = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-  </svg>
-)
-const IconChevronDown = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="6 9 12 15 18 9"/>
-  </svg>
-)
-
-// ─── Release Card ─────────────────────────────────────────────────────────────
-function ReleaseCard({ release, type, repo }: { release: Release; type: 'server' | 'app'; repo: string }) {
-  const [expanded, setExpanded] = useState(false)
-  const mainAssets = release.assets.filter(a => !a.name.endsWith('.zip') && !a.name.endsWith('.tar.gz'))
+function FlipCard({ title, subtitle, icon, backTitle, backDesc, action }: FlipCardProps) {
+  const [flipped, setFlipped] = useState(false)
 
   return (
-    <div style={{
-      background: 'rgba(99,102,241,0.05)',
-      border: '1px solid rgba(99,102,241,0.2)',
-      borderRadius: '16px',
-      padding: '24px',
-      transition: 'all 0.3s ease',
-    }}
-    onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(99,102,241,0.5)')}
-    onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(99,102,241,0.2)')}
+    <div
+      className={`flip-card-container ${flipped ? 'is-flipped' : ''}`}
+      style={{ height: '220px', cursor: 'pointer' }}
+      onClick={() => setFlipped(!flipped)}
+    >
+      <div className="flip-card-inner">
+        {/* Front Face */}
+        <div
+          className="flip-card-front"
+          style={{
+            backgroundColor: '#111827',
+            border: '1px solid #1f293d',
+            padding: '24px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+            <div
+              style={{
+                width: '46px',
+                height: '46px',
+                backgroundColor: '#172554',
+                color: '#3b82f6',
+                borderRadius: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {icon}
+            </div>
+            <span
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                color: '#2563eb',
+                backgroundColor: '#172554',
+                padding: '4px 10px',
+                borderRadius: '20px',
+              }}
+            >
+              Cliquer pour retourner ↺
+            </span>
+          </div>
+
+          <div>
+            <h4 style={{ fontSize: '18px', fontWeight: 700, color: '#f8fafc', marginBottom: '6px' }}>{title}</h4>
+            <p style={{ fontSize: '13px', color: '#94a3b8' }}>{subtitle}</p>
+          </div>
+        </div>
+
+        {/* Back Face */}
+        <div
+          className="flip-card-back"
+          style={{
+            backgroundColor: '#162032',
+            border: '1px solid #2563eb',
+            padding: '24px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+              <Terminal size={16} color="#3b82f6" />
+              <h4 style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc' }}>{backTitle}</h4>
+            </div>
+            <p style={{ fontSize: '13px', color: '#94a3b8', lineHeight: 1.6 }}>{backDesc}</p>
+          </div>
+
+          <div
+            style={{
+              backgroundColor: '#0b0f19',
+              padding: '8px 12px',
+              borderRadius: '8px',
+              border: '1px solid #1f293d',
+              fontSize: '12px',
+              fontFamily: 'monospace',
+              color: '#3b82f6',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
+          >
+            <Terminal size={14} />
+            <span>{action}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Accordion Item Component ─────────────────────────────────────────────────
+interface AccordionItemProps {
+  id: string
+  step: string
+  title: string
+  isOpen: boolean
+  onToggle: () => void
+  children: React.ReactNode
+}
+
+function AccordionItem({ step, title, isOpen, onToggle, children }: AccordionItemProps) {
+  return (
+    <div
+      style={{
+        backgroundColor: '#111827',
+        border: `1px solid ${isOpen ? '#2563eb' : '#1f293d'}`,
+        borderRadius: '14px',
+        overflow: 'hidden',
+        transition: 'border-color 0.2s ease',
+      }}
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '20px 24px',
+          backgroundColor: 'transparent',
+          border: 'none',
+          color: '#f8fafc',
+          cursor: 'pointer',
+          textAlign: 'left',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '8px',
+              backgroundColor: isOpen ? '#2563eb' : '#1e293b',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '14px',
+              fontWeight: 700,
+              fontFamily: 'monospace',
+              transition: 'background-color 0.2s',
+            }}
+          >
+            {step}
+          </span>
+          <span style={{ fontSize: '16px', fontWeight: 600 }}>{title}</span>
+        </div>
+        <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+          <ChevronDown size={20} color="#94a3b8" />
+        </motion.div>
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+          >
+            <div
+              style={{
+                padding: '0 24px 24px 24px',
+                borderTop: '1px solid #1f293d',
+                paddingTop: '20px',
+                color: '#94a3b8',
+                fontSize: '14px',
+                lineHeight: 1.7,
+              }}
+            >
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+// ─── Release Card Component ───────────────────────────────────────────────────
+function ReleaseCard({ release, type, repo }: { release: Release; type: 'server' | 'app'; repo: string }) {
+  const [showNotes, setShowNotes] = useState(false)
+  const isServer = type === 'server'
+
+  return (
+    <div
+      style={{
+        backgroundColor: '#111827',
+        border: '1px solid #1f293d',
+        borderRadius: '16px',
+        padding: '24px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '20px',
+      }}
     >
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{
-            background: 'linear-gradient(135deg, #6366f1, #818cf8)',
-            borderRadius: '10px',
-            width: '40px', height: '40px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '18px',
-          }}>
-            {type === 'server' ? '🖥️' : '📱'}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div
+            style={{
+              width: '44px',
+              height: '44px',
+              backgroundColor: '#172554',
+              color: '#3b82f6',
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {isServer ? <Monitor size={22} /> : <Smartphone size={22} />}
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '18px', fontWeight: 700, color: '#f1f5f9' }}>{release.tag_name}</span>
-              <span style={{
-                background: 'linear-gradient(135deg, #6366f1, #22d3ee)',
-                color: '#fff',
-                fontSize: '11px',
-                fontWeight: 600,
-                padding: '2px 10px',
-                borderRadius: '20px',
-                letterSpacing: '0.5px',
-              }}>LATEST</span>
+              <span style={{ fontSize: '18px', fontWeight: 700, color: '#f8fafc' }}>{release.tag_name}</span>
+              <span
+                style={{
+                  backgroundColor: '#2563eb',
+                  color: '#ffffff',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                }}
+              >
+                LATEST
+              </span>
             </div>
-            <div style={{ fontSize: '13px', color: '#64748b', marginTop: '2px' }}>
-              {formatDate(release.published_at)}
-            </div>
+            <span style={{ fontSize: '12px', color: '#64748b' }}>{formatDate(release.published_at)}</span>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+
+        {/* Links to repo & actions */}
+        <div style={{ display: 'flex', gap: '8px' }}>
           <a
             href={`https://github.com/${repo}/actions`}
             target="_blank"
             rel="noopener noreferrer"
             title="Consulter les builds et artifacts de GitHub Actions"
             style={{
-              display: 'flex', alignItems: 'center', gap: '6px',
-              color: '#94a3b8', fontSize: '12px', textDecoration: 'none',
-              padding: '6px 10px',
-              border: '1px solid rgba(255,255,255,0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: '#1e293b',
+              color: '#94a3b8',
+              fontSize: '12px',
+              fontWeight: 500,
+              padding: '8px 12px',
               borderRadius: '8px',
-              transition: 'all 0.2s',
+              border: '1px solid #1f293d',
+              textDecoration: 'none',
+              transition: 'background-color 0.2s',
             }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#f1f5f9'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'transparent' }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#2563eb', e.currentTarget.style.color = '#ffffff')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#1e293b', e.currentTarget.style.color = '#94a3b8')}
           >
-            ⚡ Actions & Artifacts
+            <Radio size={14} />
+            Actions
           </a>
           <a
             href={release.html_url}
             target="_blank"
             rel="noopener noreferrer"
             style={{
-              display: 'flex', alignItems: 'center', gap: '6px',
-              color: '#818cf8', fontSize: '12px', textDecoration: 'none',
-              padding: '6px 12px',
-              border: '1px solid rgba(129,140,248,0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: '#1e293b',
+              color: '#94a3b8',
+              fontSize: '12px',
+              fontWeight: 500,
+              padding: '8px 12px',
               borderRadius: '8px',
-              transition: 'all 0.2s',
+              border: '1px solid #1f293d',
+              textDecoration: 'none',
+              transition: 'background-color 0.2s',
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(129,140,248,0.1)' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#2563eb', e.currentTarget.style.color = '#ffffff')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#1e293b', e.currentTarget.style.color = '#94a3b8')}
           >
-            <IconGitHub />
+            <Github size={14} />
             Release
-            <IconExternalLink />
+            <ExternalLink size={12} />
           </a>
         </div>
       </div>
 
-      {/* Download buttons */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: mainAssets.length > 0 ? '20px' : '0' }}>
-        {mainAssets.map(asset => (
-          <a
-            key={asset.browser_download_url}
-            href={asset.browser_download_url}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '8px',
-              background: 'linear-gradient(135deg, #6366f1, #818cf8)',
-              color: '#fff',
-              padding: '10px 18px',
-              borderRadius: '10px',
-              textDecoration: 'none',
-              fontSize: '14px',
-              fontWeight: 600,
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(99,102,241,0.3)',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(99,102,241,0.5)' }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 15px rgba(99,102,241,0.3)' }}
-          >
-            <IconDownload />
-            <span>{getOsIcon(asset.name)} {getOsLabel(asset.name)}</span>
-            <span style={{ opacity: 0.7, fontSize: '12px', fontWeight: 400 }}>({formatBytes(asset.size)})</span>
-          </a>
-        ))}
+      {/* Direct download buttons */}
+      <div>
+        <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '12px' }}>Téléchargement direct sans compte GitHub :</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {release.assets.map((asset) => {
+            const isWindows = asset.name.includes('windows') || asset.name.endsWith('.exe')
+            const isLinux = asset.name.includes('linux')
+            const isMac = asset.name.includes('macos') || asset.name.includes('mac')
+            const isApk = asset.name.endsWith('.apk')
+
+            let label = asset.name
+            if (isWindows) label = 'Télécharger pour Windows (.exe)'
+            else if (isLinux) label = 'Télécharger pour Linux'
+            else if (isMac) label = 'Télécharger pour macOS'
+            else if (isApk) label = 'Télécharger l\'APK Android'
+
+            return (
+              <a
+                key={asset.name}
+                href={asset.browser_download_url}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px 18px',
+                  backgroundColor: '#2563eb',
+                  color: '#ffffff',
+                  borderRadius: '10px',
+                  textDecoration: 'none',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  transition: 'background-color 0.2s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1d4ed8')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#2563eb')}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Download size={18} />
+                  <span>{label}</span>
+                </div>
+                <span style={{ fontSize: '12px', opacity: 0.85, fontWeight: 400 }}>{formatBytes(asset.size)}</span>
+              </a>
+            )
+          })}
+        </div>
       </div>
 
-      {/* Release notes toggle */}
+      {/* Release Notes Accordion */}
       {release.body && (
-        <div>
+        <div style={{ borderTop: '1px solid #1f293d', paddingTop: '12px' }}>
           <button
-            onClick={() => setExpanded(!expanded)}
+            type="button"
+            onClick={() => setShowNotes(!showNotes)}
             style={{
-              display: 'flex', alignItems: 'center', gap: '6px',
-              background: 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: 'transparent',
               border: 'none',
-              color: '#64748b',
+              color: '#94a3b8',
               cursor: 'pointer',
               fontSize: '13px',
-              padding: '6px 0',
-              transition: 'color 0.2s',
+              padding: 0,
             }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#818cf8' }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#64748b' }}
           >
-            <div style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }}>
-              <IconChevronDown />
-            </div>
-            Notes de version
+            <ChevronDown
+              size={16}
+              style={{
+                transform: showNotes ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s',
+              }}
+            />
+            {showNotes ? 'Masquer les notes de version' : 'Afficher les notes de version'}
           </button>
-          {expanded && (
-            <div style={{
-              marginTop: '12px',
-              padding: '16px',
-              background: 'rgba(0,0,0,0.3)',
-              borderRadius: '10px',
-              fontSize: '13px',
-              color: '#94a3b8',
-              lineHeight: '1.7',
-              whiteSpace: 'pre-wrap',
-              borderLeft: '3px solid #6366f1',
-            }}>
+          {showNotes && (
+            <div
+              style={{
+                marginTop: '10px',
+                padding: '14px',
+                backgroundColor: '#0b0f19',
+                borderRadius: '8px',
+                border: '1px solid #1f293d',
+                color: '#cbd5e1',
+                fontSize: '12px',
+                lineHeight: 1.6,
+                whiteSpace: 'pre-line',
+              }}
+            >
               {release.body}
             </div>
           )}
@@ -257,95 +538,52 @@ function ReleaseCard({ release, type, repo }: { release: Release; type: 'server'
   )
 }
 
-
-
-// ─── Default fallback releases with direct download URLs ───────────────────────
-const DEFAULT_SERVER_RELEASE: Release = {
-  tag_name: 'v1.1.1',
-  name: 'Release v1.1.1',
-  published_at: new Date().toISOString(),
-  html_url: `https://github.com/${SERVER_REPO}/releases/latest`,
-  body: 'Dernière version automatique du serveur multiplateforme.\n• Windows : server-windows.exe\n• Linux : server-linux\n• macOS : server-macos',
-  assets: [
-    {
-      name: 'server-windows.exe',
-      browser_download_url: `https://github.com/${SERVER_REPO}/releases/latest/download/server-windows.exe`,
-      size: 15 * 1024 * 1024,
-    },
-    {
-      name: 'server-linux',
-      browser_download_url: `https://github.com/${SERVER_REPO}/releases/latest/download/server-linux`,
-      size: 18 * 1024 * 1024,
-    },
-    {
-      name: 'server-macos',
-      browser_download_url: `https://github.com/${SERVER_REPO}/releases/latest/download/server-macos`,
-      size: 19 * 1024 * 1024,
-    }
-  ]
-}
-
-const DEFAULT_APP_RELEASE: Release = {
-  tag_name: 'v1.1.1',
-  name: 'Release v1.1.1',
-  published_at: new Date().toISOString(),
-  html_url: `https://github.com/${APP_REPO}/releases/latest`,
-  body: 'Dernière version de l\'application mobile Flutter.\n• Contrôle tactile et curseur souris\n• Clavier virtuel et saisie texte\n• Détection automatique du réseau local',
-  assets: [
-    {
-      name: 'app-release.apk',
-      browser_download_url: `https://github.com/${APP_REPO}/releases/latest/download/app-release.apk`,
-      size: 47.8 * 1024 * 1024,
-    }
-  ]
-}
-
-// ─── Main App ─────────────────────────────────────────────────────────────────
+// ─── Main Application ─────────────────────────────────────────────────────────
 export default function App() {
-  const [serverRelease, setServerRelease]  = useState<Release>(DEFAULT_SERVER_RELEASE)
-  const [appRelease, setAppRelease]        = useState<Release>(DEFAULT_APP_RELEASE)
-  const [activeSection, setActiveSection]  = useState('home')
-  const [scrolled, setScrolled]            = useState(false)
+  const [serverRelease, setServerRelease] = useState<Release>(DEFAULT_SERVER_RELEASE)
+  const [appRelease, setAppRelease] = useState<Release>(DEFAULT_APP_RELEASE)
+  const [activeSection, setActiveSection] = useState('home')
+  const [openDocStep, setOpenDocStep] = useState<string>('01')
+  const [copiedIp, setCopiedIp] = useState(false)
 
-  // Fetch live releases from GitHub API
+  // Fetch real releases from GitHub API
   useEffect(() => {
     fetch(`https://api.github.com/repos/${SERVER_REPO}/releases/latest`, {
-      headers: { 'Accept': 'application/vnd.github.v3+json' }
+      headers: { Accept: 'application/vnd.github.v3+json' },
     })
-      .then(r => {
-        if (!r.ok) throw new Error('API request failed')
+      .then((r) => {
+        if (!r.ok) throw new Error('Release not found')
         return r.json()
       })
-      .then(d => {
-        if (d.tag_name && d.assets && d.assets.length > 0) {
-          setServerRelease(d)
+      .then((data) => {
+        if (data.tag_name && data.assets && data.assets.length > 0) {
+          setServerRelease(data)
         }
       })
       .catch(() => {})
 
     fetch(`https://api.github.com/repos/${APP_REPO}/releases/latest`, {
-      headers: { 'Accept': 'application/vnd.github.v3+json' }
+      headers: { Accept: 'application/vnd.github.v3+json' },
     })
-      .then(r => {
-        if (!r.ok) throw new Error('API request failed')
+      .then((r) => {
+        if (!r.ok) throw new Error('Release not found')
         return r.json()
       })
-      .then(d => {
-        if (d.tag_name && d.assets && d.assets.length > 0) {
-          setAppRelease(d)
+      .then((data) => {
+        if (data.tag_name && data.assets && data.assets.length > 0) {
+          setAppRelease(data)
         }
       })
       .catch(() => {})
   }, [])
 
-  // Scroll
+  // Scroll detection
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50)
-      const sections = ['home', 'features', 'downloads', 'docs', 'about']
+      const sections = ['home', 'features', 'gestures', 'showcase', 'downloads', 'docs', 'about']
       for (const sec of sections.reverse()) {
         const el = document.getElementById(sec)
-        if (el && window.scrollY >= el.offsetTop - 120) {
+        if (el && window.scrollY >= el.offsetTop - 140) {
           setActiveSection(sec)
           break
         }
@@ -355,817 +593,1016 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const navLinks = [
-    { id: 'home',      label: 'Accueil' },
-    { id: 'features',  label: 'Fonctionnalités' },
-    { id: 'downloads', label: 'Télécharger' },
-    { id: 'docs',      label: 'Documentation' },
-    { id: 'about',     label: 'À propos' },
-  ]
-
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  return (
-    <div style={{ minHeight: '100vh', background: '#0a0a14' }}>
-      <style>{`
-        @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.5 } }
-        @keyframes float { 0%,100% { transform:translateY(0) } 50% { transform:translateY(-12px) } }
-        @keyframes glow { 0%,100% { opacity:0.5 } 50% { opacity:1 } }
-        @keyframes fadeInUp { from { opacity:0; transform:translateY(30px) } to { opacity:1; transform:translateY(0) } }
-        @keyframes spin { to { transform:rotate(360deg) } }
-        @keyframes shimmer { 0% { background-position:-200% center } 100% { background-position:200% center } }
-        .fade-in-up { animation: fadeInUp 0.6s ease forwards; }
-        .fade-in-up-delay-1 { animation: fadeInUp 0.6s ease 0.1s forwards; opacity:0; }
-        .fade-in-up-delay-2 { animation: fadeInUp 0.6s ease 0.2s forwards; opacity:0; }
-        .fade-in-up-delay-3 { animation: fadeInUp 0.6s ease 0.3s forwards; opacity:0; }
-        .float-anim { animation: float 4s ease-in-out infinite; }
-        .feature-card:hover { transform: translateY(-6px) !important; }
-        .step-card:hover .step-icon { transform: scale(1.1) rotate(5deg); }
-      `}</style>
+  const handleCopyCommand = () => {
+    navigator.clipboard.writeText('python server.py')
+    setCopiedIp(true)
+    setTimeout(() => setCopiedIp(false), 2000)
+  }
 
-      {/* ── Navbar ────────────────────────────────────────────────── */}
-      <nav style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-        padding: '0 24px',
-        background: scrolled ? 'rgba(10,10,20,0.95)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(20px)' : 'none',
-        borderBottom: scrolled ? '1px solid rgba(255,255,255,0.06)' : 'none',
-        transition: 'all 0.3s ease',
-      }}>
-        <div style={{
-          maxWidth: '1200px', margin: '0 auto',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          height: '72px',
-        }}>
-          {/* Logo */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => scrollTo('home')}>
-            <img src="/accesdistance-logo.png" alt="AccesDistance" style={{ width: '40px', height: '40px', borderRadius: '10px' }} />
-            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '18px', color: '#f1f5f9' }}>
-              <span style={{ color: '#818cf8' }}>Acces</span>Distance
+  return (
+    <div style={{ minHeight: '100vh', backgroundColor: '#0b0f19', color: '#f8fafc' }}>
+      {/* ── Navbar ────────────────────────────────────────────────────────── */}
+      <header
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 50,
+          backgroundColor: '#0b0f19',
+          borderBottom: '1px solid #1f293d',
+        }}
+      >
+        <div
+          style={{
+            maxWidth: '1200px',
+            margin: '0 auto',
+            padding: '0 24px',
+            height: '68px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          {/* Brand */}
+          <div
+            onClick={() => scrollTo('home')}
+            style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
+          >
+            <img
+              src="/accesdistance-logo.png"
+              alt="Logo AccesDistance"
+              style={{ width: '38px', height: '38px', borderRadius: '8px' }}
+            />
+            <span style={{ fontSize: '18px', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.5px' }}>
+              <span style={{ color: '#2563eb' }}>Acces</span>Distance
             </span>
           </div>
 
-          {/* Desktop links */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} className="desktop-nav">
-            {navLinks.map(link => (
-              <button key={link.id} onClick={() => scrollTo(link.id)} style={{
-                background: activeSection === link.id ? 'rgba(99,102,241,0.12)' : 'transparent',
-                border: 'none',
-                color: activeSection === link.id ? '#818cf8' : '#94a3b8',
-                padding: '8px 16px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: 500,
-                transition: 'all 0.2s',
-                fontFamily: "'Inter', sans-serif",
-              }}
-              onMouseEnter={e => { if (activeSection !== link.id) e.currentTarget.style.color = '#f1f5f9' }}
-              onMouseLeave={e => { if (activeSection !== link.id) e.currentTarget.style.color = '#94a3b8' }}
+          {/* Nav Items */}
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            {[
+              { id: 'home', label: 'Accueil' },
+              { id: 'features', label: 'Fonctionnalités' },
+              { id: 'gestures', label: 'Tactile' },
+              { id: 'showcase', label: 'Aperçu' },
+              { id: 'downloads', label: 'Téléchargements' },
+              { id: 'docs', label: 'Documentation' },
+              { id: 'about', label: 'Développeur' },
+            ].map((link) => (
+              <button
+                key={link.id}
+                type="button"
+                onClick={() => scrollTo(link.id)}
+                style={{
+                  backgroundColor: activeSection === link.id ? '#1e293b' : 'transparent',
+                  color: activeSection === link.id ? '#ffffff' : '#94a3b8',
+                  border: 'none',
+                  padding: '8px 14px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                }}
               >
                 {link.label}
               </button>
             ))}
-          </div>
+          </nav>
 
-          {/* CTA */}
-          <button onClick={() => scrollTo('downloads')} style={{
-            background: 'linear-gradient(135deg, #6366f1, #818cf8)',
-            border: 'none',
-            color: '#fff',
-            padding: '10px 22px',
-            borderRadius: '10px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: 600,
-            display: 'flex', alignItems: 'center', gap: '8px',
-            boxShadow: '0 4px 15px rgba(99,102,241,0.35)',
-            transition: 'all 0.3s',
-            fontFamily: "'Inter', sans-serif",
-          }}
-          onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 25px rgba(99,102,241,0.55)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
-          onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 4px 15px rgba(99,102,241,0.35)'; e.currentTarget.style.transform = 'translateY(0)' }}
+          {/* Quick CTA */}
+          <button
+            type="button"
+            onClick={() => scrollTo('downloads')}
+            style={{
+              backgroundColor: '#2563eb',
+              color: '#ffffff',
+              border: 'none',
+              padding: '10px 18px',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'background-color 0.2s',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1d4ed8')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#2563eb')}
           >
-            <IconDownload />
+            <Download size={16} />
             Télécharger
           </button>
         </div>
-      </nav>
+      </header>
 
-      {/* ── Hero ──────────────────────────────────────────────────── */}
-      <section id="home" style={{
-        minHeight: '100vh',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        position: 'relative',
-        overflow: 'hidden',
-        padding: '100px 24px 60px',
-      }}>
-        {/* Ambient orbs */}
-        <div style={{
-          position: 'absolute', top: '15%', left: '10%',
-          width: '400px', height: '400px',
-          background: 'radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)',
-          borderRadius: '50%',
-          animation: 'glow 4s ease-in-out infinite',
-          pointerEvents: 'none',
-        }} />
-        <div style={{
-          position: 'absolute', bottom: '15%', right: '10%',
-          width: '350px', height: '350px',
-          background: 'radial-gradient(circle, rgba(34,211,238,0.1) 0%, transparent 70%)',
-          borderRadius: '50%',
-          animation: 'glow 5s ease-in-out infinite 1s',
-          pointerEvents: 'none',
-        }} />
-
-        {/* Grid bg */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: `linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
-                            linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px)`,
-          backgroundSize: '50px 50px',
-          pointerEvents: 'none',
-        }} />
-
-        <div style={{ maxWidth: '900px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-          {/* Badge */}
-          <div className="fade-in-up" style={{
-            display: 'inline-flex', alignItems: 'center', gap: '8px',
-            background: 'rgba(99,102,241,0.1)',
-            border: '1px solid rgba(99,102,241,0.3)',
-            borderRadius: '50px',
-            padding: '6px 16px',
-            fontSize: '13px',
-            color: '#818cf8',
-            fontWeight: 500,
-            marginBottom: '32px',
-          }}>
-            <span style={{ display: 'inline-block', width: '8px', height: '8px', background: '#22d3ee', borderRadius: '50%', animation: 'pulse 2s infinite' }} />
-            Contrôle à distance via Wi-Fi — Open Source
-          </div>
-
-          {/* Logo */}
-          <div className="fade-in-up float-anim" style={{ marginBottom: '32px' }}>
-            <img
-              src="/accesdistance-logo.png"
-              alt="AccesDistance Logo"
-              style={{
-                width: '160px', height: '160px',
-                borderRadius: '32px',
-                boxShadow: '0 0 60px rgba(99,102,241,0.4), 0 0 120px rgba(99,102,241,0.15)',
-              }}
-            />
-          </div>
-
-          {/* Title */}
-          <h1 className="fade-in-up-delay-1" style={{
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: 'clamp(42px, 7vw, 76px)',
-            fontWeight: 800,
-            lineHeight: 1.05,
-            letterSpacing: '-2px',
-            marginBottom: '24px',
-            background: 'linear-gradient(135deg, #f1f5f9 0%, #818cf8 50%, #22d3ee 100%)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            color: 'transparent',
-          }}>
-            AccesDistance
-          </h1>
-
-          <p className="fade-in-up-delay-2" style={{
-            fontSize: 'clamp(16px, 2.5vw, 20px)',
-            color: '#94a3b8',
-            lineHeight: 1.7,
-            maxWidth: '600px',
-            margin: '0 auto 48px',
-          }}>
-            Transformez votre smartphone Android en <strong style={{ color: '#818cf8' }}>télécommande tactile</strong> pour votre PC.
-            Visualisez l'écran en temps réel, contrôlez la souris et le clavier via Wi-Fi.
-          </p>
-
-          {/* CTAs */}
-          <div className="fade-in-up-delay-3" style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button onClick={() => scrollTo('downloads')} style={{
-              background: 'linear-gradient(135deg, #6366f1, #818cf8)',
-              border: 'none',
-              color: '#fff',
-              padding: '16px 36px',
-              borderRadius: '14px',
-              cursor: 'pointer',
-              fontSize: '16px',
-              fontWeight: 700,
-              display: 'flex', alignItems: 'center', gap: '10px',
-              boxShadow: '0 8px 30px rgba(99,102,241,0.4)',
-              transition: 'all 0.3s',
-              fontFamily: "'Inter', sans-serif",
-            }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(99,102,241,0.6)' }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 30px rgba(99,102,241,0.4)' }}
-            >
-              <IconDownload />
-              Télécharger maintenant
-            </button>
-            <button onClick={() => scrollTo('docs')} style={{
-              background: 'transparent',
-              border: '1px solid rgba(255,255,255,0.15)',
-              color: '#f1f5f9',
-              padding: '16px 36px',
-              borderRadius: '14px',
-              cursor: 'pointer',
-              fontSize: '16px',
+      {/* ── Hero Section (Framer Motion) ──────────────────────────────────── */}
+      <section
+        id="home"
+        style={{
+          paddingTop: '150px',
+          paddingBottom: '90px',
+          paddingLeft: '24px',
+          paddingRight: '24px',
+          maxWidth: '1200px',
+          margin: '0 auto',
+        }}
+      >
+        <div style={{ textAlign: 'center', maxWidth: '850px', margin: '0 auto' }}>
+          {/* Top Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: -15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              backgroundColor: '#111827',
+              border: '1px solid #1f293d',
+              borderRadius: '30px',
+              padding: '6px 16px',
+              fontSize: '13px',
+              color: '#3b82f6',
               fontWeight: 600,
-              transition: 'all 0.3s',
-              fontFamily: "'Inter', sans-serif",
+              marginBottom: '28px',
             }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.5)'; e.currentTarget.style.background = 'rgba(99,102,241,0.08)' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.background = 'transparent' }}
-            >
-              📖 Documentation
-            </button>
-          </div>
+          >
+            <Zap size={14} color="#2563eb" />
+            Contrôle PC sans latence via Wi-Fi Local · Open Source
+          </motion.div>
 
-          {/* Stats */}
-          <div style={{
-            display: 'flex', justifyContent: 'center', gap: '40px', marginTop: '72px',
-            flexWrap: 'wrap',
-          }}>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            style={{
+              fontSize: 'clamp(36px, 5.5vw, 60px)',
+              fontWeight: 800,
+              lineHeight: 1.15,
+              color: '#ffffff',
+              letterSpacing: '-1.5px',
+              marginBottom: '20px',
+            }}
+          >
+            Contrôlez votre PC depuis votre smartphone
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            style={{
+              fontSize: '17px',
+              color: '#94a3b8',
+              lineHeight: 1.7,
+              marginBottom: '36px',
+              maxWidth: '680px',
+              margin: '0 auto 36px',
+            }}
+          >
+            AccesDistance transforme votre téléphone Android en un pavé tactile ultra-réactif avec affichage direct de
+            l'écran de votre ordinateur en temps réel.
+          </motion.p>
+
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}
+          >
+            <button
+              type="button"
+              onClick={() => scrollTo('downloads')}
+              style={{
+                backgroundColor: '#2563eb',
+                color: '#ffffff',
+                border: 'none',
+                padding: '14px 28px',
+                borderRadius: '10px',
+                fontSize: '15px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                transition: 'background-color 0.2s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1d4ed8')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#2563eb')}
+            >
+              <Download size={18} />
+              Télécharger l'APK & Serveur
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollTo('docs')}
+              style={{
+                backgroundColor: '#111827',
+                color: '#f8fafc',
+                border: '1px solid #1f293d',
+                padding: '14px 28px',
+                borderRadius: '10px',
+                fontSize: '15px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                transition: 'border-color 0.2s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#2563eb')}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#1f293d')}
+            >
+              <Terminal size={18} color="#3b82f6" />
+              Guide d'utilisation
+            </button>
+          </motion.div>
+
+          {/* Highlights solid grid */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+              gap: '16px',
+              marginTop: '60px',
+            }}
+          >
             {[
-              { value: 'Wi-Fi', label: 'Sans câble' },
-              { value: 'LAN', label: 'Réseau local' },
-              { value: '60fps', label: 'Flux vidéo' },
-              { value: 'Free', label: 'Open Source' },
-            ].map(stat => (
-              <div key={stat.label} style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '28px', fontWeight: 800, color: '#818cf8', fontFamily: "'Space Grotesk', sans-serif" }}>{stat.value}</div>
-                <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>{stat.label}</div>
+              { label: 'Wi-Fi Local', desc: 'Sans Internet', icon: <Wifi size={18} color="#3b82f6" /> },
+              { label: '60 FPS', desc: 'Compression JPEG', icon: <Monitor size={18} color="#3b82f6" /> },
+              { label: 'UDP & TCP', desc: 'Faible latence', icon: <Zap size={18} color="#3b82f6" /> },
+              { label: '100% Privé', desc: 'Aucun serveur cloud', icon: <ShieldCheck size={18} color="#3b82f6" /> },
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                style={{
+                  backgroundColor: '#111827',
+                  border: '1px solid #1f293d',
+                  borderRadius: '12px',
+                  padding: '18px 16px',
+                  textAlign: 'center',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>{item.icon}</div>
+                <div style={{ fontSize: '15px', fontWeight: 700, color: '#f8fafc' }}>{item.label}</div>
+                <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>{item.desc}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Features ──────────────────────────────────────────────── */}
-      <section id="features" style={{ padding: '100px 24px', maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '64px' }}>
-          <div style={{
-            display: 'inline-block',
-            background: 'rgba(99,102,241,0.1)',
-            border: '1px solid rgba(99,102,241,0.2)',
-            borderRadius: '50px',
-            padding: '4px 16px',
-            fontSize: '12px',
-            color: '#818cf8',
-            fontWeight: 600,
-            letterSpacing: '1px',
-            textTransform: 'uppercase',
-            marginBottom: '16px',
-          }}>Fonctionnalités</div>
-          <h2 style={{
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: 'clamp(28px, 5vw, 44px)',
-            fontWeight: 700,
-            color: '#f1f5f9',
-            lineHeight: 1.2,
-          }}>
-            Tout ce dont vous avez besoin
+      {/* ── Features Section ──────────────────────────────────────────────── */}
+      <section
+        id="features"
+        style={{
+          padding: '80px 24px',
+          maxWidth: '1200px',
+          margin: '0 auto',
+          borderTop: '1px solid #1f293d',
+        }}
+      >
+        <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+          <span
+            style={{
+              fontSize: '12px',
+              fontWeight: 700,
+              color: '#2563eb',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+            }}
+          >
+            ARCHITECTURE TECHNIQUE
+          </span>
+          <h2 style={{ fontSize: '32px', fontWeight: 800, color: '#f8fafc', marginTop: '8px' }}>
+            Performances et simplicité
           </h2>
-          <p style={{ color: '#64748b', fontSize: '16px', marginTop: '12px', maxWidth: '500px', margin: '12px auto 0' }}>
-            Un contrôle total de votre PC depuis votre poche, sans logiciel tiers payant.
+          <p style={{ color: '#94a3b8', fontSize: '15px', marginTop: '8px' }}>
+            Une solution pensée pour être ultra-rapide sur votre réseau domestique ou professionnel.
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
           {[
             {
-              icon: <IconMonitor />,
-              color: '#6366f1',
-              title: 'Stream d\'écran en temps réel',
-              desc: 'Visualisez l\'écran de votre PC sur votre smartphone avec une compression JPEG optimisée pour un débit fluide sur votre réseau local.',
+              icon: <Monitor size={22} color="#3b82f6" />,
+              title: 'Flux d\'écran haute vitesse',
+              desc: 'Capture optimisée MSS + OpenCV en boucle continue, encodée en JPEG avec ajustement dynamique de la qualité.',
             },
             {
-              icon: <IconSmartphone />,
-              color: '#22d3ee',
-              title: 'Contrôle tactile complet',
-              desc: 'Touchez l\'écran de votre téléphone pour déplacer la souris, cliquer, faire un double-clic, clic-droit, scroll et saisir du texte.',
+              icon: <MousePointerClick size={22} color="#3b82f6" />,
+              title: 'Dual-Socket TCP & UDP',
+              desc: 'Le flux vidéo passe par TCP (port 9999) et les actions tactiles passent par UDP (port 9998) pour éliminer les retards.',
             },
             {
-              icon: <IconWifi />,
-              color: '#a78bfa',
-              title: 'Connexion Wi-Fi locale',
-              desc: 'Aucun serveur tiers, aucun cloud. La connexion est directe entre votre PC et votre téléphone via TCP/UDP sur votre réseau Wi-Fi.',
+              icon: <Keyboard size={22} color="#3b82f6" />,
+              title: 'Clavier & Presse-papier',
+              desc: 'Frappe de texte fluide avec gestion automatique des caractères accentués via le presse-papier sécurisé.',
             },
             {
-              icon: <IconZap />,
-              color: '#f59e0b',
-              title: 'Ultra-réactif',
-              desc: 'Architecture dual-socket : TCP pour le flux vidéo, UDP pour les événements tactiles. Latence minimale pour une expérience fluide.',
+              icon: <Maximize2 size={22} color="#3b82f6" />,
+              title: 'Mode Immersif Plein Écran',
+              desc: 'Affiche la totalité de l\'écran de votre PC sur votre smartphone sans bandes noires parasites.',
             },
             {
-              icon: <IconShield />,
-              color: '#10b981',
-              title: 'Aucune donnée envoyée',
-              desc: 'Tout reste sur votre réseau local. Aucune télémétrie, aucun compte requis. Votre vie privée est respectée.',
+              icon: <Cpu size={22} color="#3b82f6" />,
+              title: 'Serveur multiplateforme',
+              desc: 'Compatible nativement avec Windows (.exe autonome), Linux et macOS sans installation de dépendances lourdes.',
             },
             {
-              icon: <IconCode />,
-              color: '#ec4899',
-              title: 'Open Source',
-              desc: 'Code source entièrement disponible sur GitHub. Contribuez, forkez, et adaptez AccesDistance à vos besoins.',
+              icon: <ShieldCheck size={22} color="#3b82f6" />,
+              title: 'Zéro collecte de données',
+              desc: 'Toutes les communications restent strictement cantonnées à votre routeur Wi-Fi local.',
             },
-          ].map((feature, i) => (
-            <div
+          ].map((card, i) => (
+            <motion.div
               key={i}
-              className="feature-card"
+              whileHover={{ y: -4 }}
+              transition={{ duration: 0.2 }}
               style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: `1px solid rgba(255,255,255,0.06)`,
-                borderRadius: '20px',
-                padding: '28px',
-                transition: 'all 0.3s ease',
-                cursor: 'default',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.borderColor = `${feature.color}40`
-                e.currentTarget.style.background = `${feature.color}08`
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'
-                e.currentTarget.style.background = 'rgba(255,255,255,0.03)'
+                backgroundColor: '#111827',
+                border: '1px solid #1f293d',
+                borderRadius: '14px',
+                padding: '24px',
               }}
             >
-              <div style={{
-                width: '52px', height: '52px',
-                background: `${feature.color}20`,
-                border: `1px solid ${feature.color}40`,
-                borderRadius: '14px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: feature.color,
-                marginBottom: '18px',
-                transition: 'transform 0.3s',
-              }}>
-                {feature.icon}
+              <div
+                style={{
+                  width: '44px',
+                  height: '44px',
+                  backgroundColor: '#172554',
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '16px',
+                }}
+              >
+                {card.icon}
               </div>
-              <h3 style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: '17px', fontWeight: 600,
-                color: '#f1f5f9', marginBottom: '10px',
-              }}>
-                {feature.title}
-              </h3>
-              <p style={{ fontSize: '14px', color: '#64748b', lineHeight: 1.7 }}>
-                {feature.desc}
-              </p>
-            </div>
+              <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#f8fafc', marginBottom: '8px' }}>{card.title}</h3>
+              <p style={{ fontSize: '14px', color: '#94a3b8', lineHeight: 1.6 }}>{card.desc}</p>
+            </motion.div>
           ))}
         </div>
       </section>
 
-      {/* ── Downloads ─────────────────────────────────────────────── */}
-      <section id="downloads" style={{ padding: '100px 24px', background: 'rgba(99,102,241,0.03)' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '64px' }}>
-            <div style={{
-              display: 'inline-block',
-              background: 'rgba(99,102,241,0.1)',
-              border: '1px solid rgba(99,102,241,0.2)',
-              borderRadius: '50px',
-              padding: '4px 16px',
+      {/* ── 3D FLIP CARDS Section (Gestes Tactiles) ────────────────────────── */}
+      <section
+        id="gestures"
+        style={{
+          padding: '80px 24px',
+          maxWidth: '1200px',
+          margin: '0 auto',
+          borderTop: '1px solid #1f293d',
+        }}
+      >
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <span
+            style={{
               fontSize: '12px',
-              color: '#818cf8',
-              fontWeight: 600,
-              letterSpacing: '1px',
+              fontWeight: 700,
+              color: '#2563eb',
               textTransform: 'uppercase',
-              marginBottom: '16px',
-            }}>Téléchargements</div>
-            <h2 style={{
-              fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: 'clamp(28px, 5vw, 44px)',
-              fontWeight: 700, color: '#f1f5f9', lineHeight: 1.2,
-            }}>
-              Dernières versions
-            </h2>
-            <p style={{ color: '#64748b', fontSize: '16px', marginTop: '12px', maxWidth: '500px', margin: '12px auto 0' }}>
-              Mises à jour automatiques à chaque commit sur la branche principale.
+              letterSpacing: '1px',
+            }}
+          >
+            INTERACTION TACTILE
+          </span>
+          <h2 style={{ fontSize: '32px', fontWeight: 800, color: '#f8fafc', marginTop: '8px' }}>
+            Gestes et commandes
+          </h2>
+          <p style={{ color: '#94a3b8', fontSize: '15px', marginTop: '8px' }}>
+            Survolez ou cliquez sur les cartes pour découvrir le fonctionnement technique sous le capot.
+          </p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+          <FlipCard
+            title="Clic Gauche"
+            subtitle="Tapez 1 fois sur l'écran"
+            icon={<MousePointerClick size={22} />}
+            backTitle="Commande PyAutoGUI"
+            backDesc="Envoie les coordonnées normalisées (0.0-1.0) au serveur via UDP pour cliquer exactement sur le pixel ciblé."
+            action="CLICK,0.452,0.612,left"
+          />
+          <FlipCard
+            title="Double Clic"
+            subtitle="Tapez 2 fois rapidement"
+            icon={<Mouse size={22} />}
+            backTitle="Ouverture de fichiers"
+            backDesc="Idéal pour lancer des logiciels, ouvrir des dossiers ou sélectionner un mot complet dans un traitement de texte."
+            action="DOUBLE_CLICK,0.320,0.145"
+          />
+          <FlipCard
+            title="Clic Droit"
+            subtitle="Appui long ou tap prolongé"
+            icon={<Layers size={22} />}
+            backTitle="Menu contextuel"
+            backDesc="Ouvre instantanément les menus contextuels Windows, Linux ou macOS avec une latence quasi-nulle."
+            action="RIGHT_CLICK,0.510,0.480"
+          />
+          <FlipCard
+            title="Défilement (Scroll)"
+            subtitle="Glissez avec 2 doigts"
+            icon={<ArrowUpDown size={22} />}
+            backTitle="Molette de souris"
+            backDesc="Convertit le vecteur delta Y du geste en pas de défilement proportionnels pour lire vos pages web confortablement."
+            action="SCROLL,0.0,-5"
+          />
+          <FlipCard
+            title="Saisie Clavier"
+            subtitle="Clavier virtuel complet"
+            icon={<Keyboard size={22} />}
+            backTitle="Injection de touches"
+            backDesc="Prend en charge les lettres, chiffres, touches spéciales (Entrée, Retour arrière, Échap) et caractères Unicode."
+            action="KEY,return | TEXT,Bonjour"
+          />
+          <FlipCard
+            title="Déplacement Direct"
+            subtitle="Glissez le doigt sur l'écran"
+            icon={<Move size={22} />}
+            backTitle="Suivi temps réel"
+            backDesc="Le curseur de la souris du PC suit fidèlement la position de votre doigt en coordonnées plein écran."
+            action="MOVE,0.724,0.339"
+          />
+        </div>
+      </section>
+
+      {/* ── SWIPER Showcase Carousel Section ──────────────────────────────── */}
+      <section
+        id="showcase"
+        style={{
+          padding: '80px 24px',
+          maxWidth: '1200px',
+          margin: '0 auto',
+          borderTop: '1px solid #1f293d',
+        }}
+      >
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <span
+            style={{
+              fontSize: '12px',
+              fontWeight: 700,
+              color: '#2563eb',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+            }}
+          >
+            CARROUSEL INTERACTIF (SWIPER)
+          </span>
+          <h2 style={{ fontSize: '32px', fontWeight: 800, color: '#f8fafc', marginTop: '8px' }}>
+            Découvrez AccesDistance en action
+          </h2>
+          <p style={{ color: '#94a3b8', fontSize: '15px', marginTop: '8px' }}>
+            Faites glisser pour explorer les points forts du système.
+          </p>
+        </div>
+
+        <Swiper
+          modules={[Pagination, Navigation, Autoplay]}
+          spaceBetween={24}
+          slidesPerView={1}
+          breakpoints={{
+            768: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 },
+          }}
+          pagination={{ clickable: true }}
+          navigation
+          autoplay={{ delay: 3500, disableOnInteraction: false }}
+        >
+          <SwiperSlide>
+            <div
+              style={{
+                backgroundColor: '#111827',
+                border: '1px solid #1f293d',
+                borderRadius: '16px',
+                padding: '28px',
+                height: '320px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    backgroundColor: '#172554',
+                    borderRadius: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#3b82f6',
+                    marginBottom: '16px',
+                  }}
+                >
+                  <Monitor size={24} />
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#f8fafc', marginBottom: '8px' }}>
+                  1. Écran PC dupliqué
+                </h3>
+                <p style={{ fontSize: '14px', color: '#94a3b8', lineHeight: 1.6 }}>
+                  Visualisez en temps réel l'écran de votre machine avec un taux de rafraîchissement fluide et une
+                  compression optimisée pour votre bande passante locale.
+                </p>
+              </div>
+              <span style={{ fontSize: '12px', color: '#2563eb', fontWeight: 600 }}>TCP Port 9999 · 60 FPS</span>
+            </div>
+          </SwiperSlide>
+
+          <SwiperSlide>
+            <div
+              style={{
+                backgroundColor: '#111827',
+                border: '1px solid #1f293d',
+                borderRadius: '16px',
+                padding: '28px',
+                height: '320px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    backgroundColor: '#172554',
+                    borderRadius: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#3b82f6',
+                    marginBottom: '16px',
+                  }}
+                >
+                  <Smartphone size={24} />
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#f8fafc', marginBottom: '8px' }}>
+                  2. Contrôle tactile précis
+                </h3>
+                <p style={{ fontSize: '14px', color: '#94a3b8', lineHeight: 1.6 }}>
+                  Tous les gestes tactiles naturels du smartphone sont interprétés et traduits en mouvements de souris
+                  sans décalage perceptif.
+                </p>
+              </div>
+              <span style={{ fontSize: '12px', color: '#2563eb', fontWeight: 600 }}>UDP Port 9998 · Zéro latence</span>
+            </div>
+          </SwiperSlide>
+
+          <SwiperSlide>
+            <div
+              style={{
+                backgroundColor: '#111827',
+                border: '1px solid #1f293d',
+                borderRadius: '16px',
+                padding: '28px',
+                height: '320px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    backgroundColor: '#172554',
+                    borderRadius: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#3b82f6',
+                    marginBottom: '16px',
+                  }}
+                >
+                  <Keyboard size={24} />
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#f8fafc', marginBottom: '8px' }}>
+                  3. Clavier et raccourcis
+                </h3>
+                <p style={{ fontSize: '14px', color: '#94a3b8', lineHeight: 1.6 }}>
+                  Saisissez du texte, tapez vos mots de passe ou déclenchez des raccourcis système (Ctrl+C, Ctrl+V, Alt+Tab)
+                  depuis l'interface mobile.
+                </p>
+              </div>
+              <span style={{ fontSize: '12px', color: '#2563eb', fontWeight: 600 }}>Support Unicode & Presse-papier</span>
+            </div>
+          </SwiperSlide>
+
+          <SwiperSlide>
+            <div
+              style={{
+                backgroundColor: '#111827',
+                border: '1px solid #1f293d',
+                borderRadius: '16px',
+                padding: '28px',
+                height: '320px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    backgroundColor: '#172554',
+                    borderRadius: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#3b82f6',
+                    marginBottom: '16px',
+                  }}
+                >
+                  <Wifi size={24} />
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#f8fafc', marginBottom: '8px' }}>
+                  4. Détection automatique IP
+                </h3>
+                <p style={{ fontSize: '14px', color: '#94a3b8', lineHeight: 1.6 }}>
+                  Le serveur détecte automatiquement votre adresse IPv4 locale au démarrage pour faciliter la saisie sur
+                  votre smartphone.
+                </p>
+              </div>
+              <span style={{ fontSize: '12px', color: '#2563eb', fontWeight: 600 }}>192.168.x.x / 10.x.x.x</span>
+            </div>
+          </SwiperSlide>
+        </Swiper>
+      </section>
+
+      {/* ── Downloads Section ─────────────────────────────────────────────── */}
+      <section
+        id="downloads"
+        style={{
+          padding: '80px 24px',
+          maxWidth: '1200px',
+          margin: '0 auto',
+          borderTop: '1px solid #1f293d',
+        }}
+      >
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <span
+            style={{
+              fontSize: '12px',
+              fontWeight: 700,
+              color: '#2563eb',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+            }}
+          >
+            TÉLÉCHARGEMENT DIRECT
+          </span>
+          <h2 style={{ fontSize: '32px', fontWeight: 800, color: '#f8fafc', marginTop: '8px' }}>
+            Versions officielles prêtes à l'emploi
+          </h2>
+          <p style={{ color: '#94a3b8', fontSize: '15px', marginTop: '8px' }}>
+            Les fichiers sont générés automatiquement par les workflows GitHub Actions à chaque mise à jour.
+          </p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '24px' }}>
+          {/* Server card */}
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+              <Monitor size={22} color="#3b82f6" />
+              <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#f8fafc' }}>Logiciel Serveur PC</h3>
+              <span style={{ fontSize: '12px', color: '#64748b' }}>Windows · Linux · macOS</span>
+            </div>
+            <ReleaseCard release={serverRelease} type="server" repo={SERVER_REPO} />
+          </div>
+
+          {/* Mobile card */}
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+              <Smartphone size={22} color="#3b82f6" />
+              <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#f8fafc' }}>Application Mobile</h3>
+              <span style={{ fontSize: '12px', color: '#64748b' }}>Android APK</span>
+            </div>
+            <ReleaseCard release={appRelease} type="app" repo={APP_REPO} />
+          </div>
+        </div>
+      </section>
+
+      {/* ── Documentation (Accordions) Section ────────────────────────────── */}
+      <section
+        id="docs"
+        style={{
+          padding: '80px 24px',
+          maxWidth: '1000px',
+          margin: '0 auto',
+          borderTop: '1px solid #1f293d',
+        }}
+      >
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <span
+            style={{
+              fontSize: '12px',
+              fontWeight: 700,
+              color: '#2563eb',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+            }}
+          >
+            GUIDE DE CONFIGURATION (ACCORDÉONS)
+          </span>
+          <h2 style={{ fontSize: '32px', fontWeight: 800, color: '#f8fafc', marginTop: '8px' }}>
+            Comment démarrer en quelques clics
+          </h2>
+          <p style={{ color: '#94a3b8', fontSize: '15px', marginTop: '8px' }}>
+            Cliquez sur chaque étape pour déployer le serveur et connecter votre smartphone.
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <AccordionItem
+            id="step-1"
+            step="01"
+            title="Lancer le serveur sur votre PC"
+            isOpen={openDocStep === '01'}
+            onToggle={() => setOpenDocStep(openDocStep === '01' ? '' : '01')}
+          >
+            <p style={{ marginBottom: '14px' }}>
+              Téléchargez l'exécutable pour votre système d'exploitation ci-dessus, puis lancez-le simplement :
             </p>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
-            {/* Server */}
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-                <span style={{ fontSize: '22px' }}>🖥️</span>
-                <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '20px', fontWeight: 700, color: '#f1f5f9' }}>
-                  Serveur PC
-                </h3>
-                <span style={{ fontSize: '12px', color: '#64748b' }}>Windows • Linux • macOS</span>
+            <div
+              style={{
+                backgroundColor: '#0b0f19',
+                borderRadius: '10px',
+                padding: '16px',
+                fontFamily: 'monospace',
+                fontSize: '13px',
+                border: '1px solid #1f293d',
+                color: '#cbd5e1',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '6px',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#64748b' }}># Windows (Double-clic ou Invite de commandes)</span>
+                <button
+                  type="button"
+                  onClick={handleCopyCommand}
+                  style={{
+                    backgroundColor: '#1e293b',
+                    color: '#94a3b8',
+                    border: 'none',
+                    padding: '4px 10px',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '11px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  {copiedIp ? <Check size={12} color="#10b981" /> : <Copy size={12} />}
+                  {copiedIp ? 'Copié !' : 'Copier'}
+                </button>
               </div>
-              <ReleaseCard release={serverRelease} type="server" repo={SERVER_REPO} />
+              <span style={{ color: '#3b82f6' }}>&gt; server-windows.exe</span>
+              <div style={{ color: '#64748b', margin: '4px 0' }}>──────────────────────────────────────────</div>
+              <span style={{ color: '#f8fafc' }}>SERVEUR D'ÉCRAN TACTILE ET AFFICHAGE DISTANT</span>
+              <span style={{ color: '#3b82f6' }}>-&gt; Adresse IP du PC : 192.168.1.50</span>
+              <span style={{ color: '#94a3b8' }}>-&gt; Port Stream Vidéo (TCP) : 9999</span>
+              <span style={{ color: '#94a3b8' }}>-&gt; Port Tactile / Souris (UDP) : 9998</span>
             </div>
+          </AccordionItem>
 
-            {/* App */}
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-                <span style={{ fontSize: '22px' }}>📱</span>
-                <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '20px', fontWeight: 700, color: '#f1f5f9' }}>
-                  Application Android
-                </h3>
-                <span style={{ fontSize: '12px', color: '#64748b' }}>APK Android</span>
-              </div>
-              <ReleaseCard release={appRelease} type="app" repo={APP_REPO} />
+          <AccordionItem
+            id="step-2"
+            step="02"
+            title="Installer l'application sur votre smartphone"
+            isOpen={openDocStep === '02'}
+            onToggle={() => setOpenDocStep(openDocStep === '02' ? '' : '02')}
+          >
+            <p style={{ marginBottom: '14px' }}>
+              Transférez le fichier <code style={{ color: '#3b82f6', backgroundColor: '#0b0f19', padding: '2px 6px', borderRadius: '4px' }}>app-release.apk</code> sur votre téléphone et procédez à l'installation :
+            </p>
+            <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <li>Autorisez l'installation des applications depuis des sources inconnues si Android le requiert.</li>
+              <li>Ouvrez l'application <strong>AccesDistance</strong>.</li>
+              <li>Assurez-vous que votre téléphone est bien connecté au <strong>même réseau Wi-Fi</strong> que votre PC.</li>
+            </ul>
+          </AccordionItem>
+
+          <AccordionItem
+            id="step-3"
+            step="03"
+            title="Se connecter et prendre le contrôle"
+            isOpen={openDocStep === '03'}
+            onToggle={() => setOpenDocStep(openDocStep === '03' ? '' : '03')}
+          >
+            <p style={{ marginBottom: '14px' }}>
+              Dans l'application, saisissez l'adresse IP affichée dans la console de votre serveur (exemple : <code style={{ color: '#3b82f6', backgroundColor: '#0b0f19', padding: '2px 6px', borderRadius: '4px' }}>192.168.1.50</code>) et appuyez sur <strong>Se connecter</strong>.
+            </p>
+            <div
+              style={{
+                backgroundColor: '#0b0f19',
+                border: '1px solid #1f293d',
+                borderRadius: '8px',
+                padding: '12px 16px',
+                fontSize: '13px',
+                color: '#3b82f6',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <CheckCircle2 size={16} />
+              <span>L'affichage de l'écran et la prise de contrôle sont instantanés !</span>
             </div>
-          </div>
+          </AccordionItem>
         </div>
       </section>
 
-      {/* ── Documentation ─────────────────────────────────────────── */}
-      <section id="docs" style={{ padding: '100px 24px', maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '64px' }}>
-          <div style={{
-            display: 'inline-block',
-            background: 'rgba(99,102,241,0.1)',
-            border: '1px solid rgba(99,102,241,0.2)',
-            borderRadius: '50px',
-            padding: '4px 16px',
-            fontSize: '12px', color: '#818cf8', fontWeight: 600,
-            letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '16px',
-          }}>Documentation</div>
-          <h2 style={{
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: 'clamp(28px, 5vw, 44px)',
-            fontWeight: 700, color: '#f1f5f9', lineHeight: 1.2,
-          }}>
-            Démarrer en 3 étapes
+      {/* ── Developer Profile Section ─────────────────────────────────────── */}
+      <section
+        id="about"
+        style={{
+          padding: '80px 24px',
+          maxWidth: '900px',
+          margin: '0 auto',
+          borderTop: '1px solid #1f293d',
+        }}
+      >
+        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+          <span
+            style={{
+              fontSize: '12px',
+              fontWeight: 700,
+              color: '#2563eb',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+            }}
+          >
+            À PROPOS DU CRÉATEUR
+          </span>
+          <h2 style={{ fontSize: '32px', fontWeight: 800, color: '#f8fafc', marginTop: '8px' }}>
+            Développé par Fabrice Faniry RANDT
           </h2>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '800px', margin: '0 auto' }}>
-          {[
-            {
-              step: '01',
-              title: 'Télécharger et lancer le serveur',
-              color: '#6366f1',
-              content: (
-                <>
-                  <p style={{ color: '#94a3b8', marginBottom: '16px', lineHeight: 1.7 }}>
-                    Téléchargez le serveur correspondant à votre OS, puis lancez-le. Il affichera l'adresse IP locale de votre PC dans le terminal.
-                  </p>
-                  <div style={{
-                    background: 'rgba(0,0,0,0.5)',
-                    borderRadius: '12px',
-                    padding: '16px 20px',
-                    fontFamily: 'monospace',
-                    fontSize: '13px',
-                    color: '#22d3ee',
-                    border: '1px solid rgba(34,211,238,0.15)',
-                  }}>
-                    <div style={{ color: '#64748b', marginBottom: '8px' }}># Windows</div>
-                    <div>{'>'} server-windows.exe</div>
-                    <div style={{ marginTop: '8px', color: '#94a3b8' }}>══════════════════════════════════════════════</div>
-                    <div style={{ color: '#818cf8' }}> SERVEUR D'ÉCRAN TACTILE ET AFFICHAGE DISTANT</div>
-                    <div style={{ color: '#22d3ee' }}> -{'>'} Adresse IP du PC : <span style={{ color: '#f1f5f9' }}>192.168.1.42</span></div>
-                    <div> -{'>'} Port Stream Vidéo (TCP) : <span style={{ color: '#f1f5f9' }}>9999</span></div>
-                    <div> -{'>'} Port Tactile / Souris (UDP) : <span style={{ color: '#f1f5f9' }}>9998</span></div>
-                  </div>
-                </>
-              ),
-            },
-            {
-              step: '02',
-              title: 'Installer l\'application Android',
-              color: '#22d3ee',
-              content: (
-                <>
-                  <p style={{ color: '#94a3b8', marginBottom: '16px', lineHeight: 1.7 }}>
-                    Téléchargez et installez l'APK AccesDistance sur votre smartphone Android. Activez l'installation depuis des sources inconnues si demandé.
-                  </p>
-                  <div style={{
-                    background: 'rgba(34,211,238,0.05)',
-                    border: '1px solid rgba(34,211,238,0.2)',
-                    borderRadius: '12px',
-                    padding: '16px',
-                    display: 'flex', gap: '12px', alignItems: 'flex-start',
-                  }}>
-                    <span style={{ fontSize: '20px' }}>⚙️</span>
-                    <div style={{ fontSize: '14px', color: '#94a3b8', lineHeight: 1.6 }}>
-                      <strong style={{ color: '#22d3ee' }}>Paramètres Android</strong> → Sécurité → Sources inconnues → Activer<br />
-                      Puis ouvrez le fichier <code style={{ background: 'rgba(0,0,0,0.4)', padding: '2px 6px', borderRadius: '4px', color: '#f1f5f9' }}>app-release.apk</code>
-                    </div>
-                  </div>
-                </>
-              ),
-            },
-            {
-              step: '03',
-              title: 'Se connecter et prendre le contrôle',
-              color: '#a78bfa',
-              content: (
-                <>
-                  <p style={{ color: '#94a3b8', marginBottom: '16px', lineHeight: 1.7 }}>
-                    Ouvrez l'application, entrez l'adresse IP affichée par le serveur, et appuyez sur <strong style={{ color: '#a78bfa' }}>Connecter</strong>. L'écran de votre PC s'affiche instantanément.
-                  </p>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                    {[
-                      { icon: '👆', label: 'Tapez', desc: 'Clic gauche' },
-                      { icon: '✌️', label: 'Appui long', desc: 'Clic droit' },
-                      { icon: '📜', label: 'Glissez', desc: 'Scroll' },
-                      { icon: '⌨️', label: 'Clavier', desc: 'Saisie texte' },
-                    ].map(action => (
-                      <div key={action.label} style={{
-                        background: 'rgba(167,139,250,0.05)',
-                        border: '1px solid rgba(167,139,250,0.15)',
-                        borderRadius: '10px',
-                        padding: '12px',
-                        display: 'flex', alignItems: 'center', gap: '10px',
-                      }}>
-                        <span style={{ fontSize: '22px' }}>{action.icon}</span>
-                        <div>
-                          <div style={{ fontSize: '13px', fontWeight: 600, color: '#f1f5f9' }}>{action.label}</div>
-                          <div style={{ fontSize: '12px', color: '#64748b' }}>{action.desc}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              ),
-            },
-          ].map((step, i) => (
-            <StepCard key={i} step={step} />
-          ))}
-        </div>
-
-        {/* Architecture */}
-        <div style={{ marginTop: '60px', maxWidth: '800px', margin: '60px auto 0' }}>
-          <h3 style={{
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: '22px', fontWeight: 700, color: '#f1f5f9',
-            marginBottom: '24px', textAlign: 'center',
-          }}>Architecture réseau</h3>
-          <div style={{
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: '20px',
-            padding: '32px',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
-              <div style={{ textAlign: 'center', padding: '16px', background: 'rgba(99,102,241,0.1)', borderRadius: '14px', minWidth: '120px' }}>
-                <div style={{ fontSize: '32px', marginBottom: '8px' }}>📱</div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#f1f5f9' }}>Smartphone</div>
-                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>Application Android</div>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '11px', color: '#6366f1', marginBottom: '4px', fontWeight: 600 }}>TCP :9999</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#6366f1' }}>
-                  <div style={{ width: '60px', height: '2px', background: 'linear-gradient(90deg, #6366f1, #22d3ee)' }} />
-                  <span>←</span>
-                </div>
-                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>Flux vidéo</div>
-                <div style={{ height: '12px' }} />
-                <div style={{ fontSize: '11px', color: '#a78bfa', marginBottom: '4px', fontWeight: 600 }}>UDP :9998</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#a78bfa' }}>
-                  <span>→</span>
-                  <div style={{ width: '60px', height: '2px', background: 'linear-gradient(90deg, #a78bfa, #6366f1)' }} />
-                </div>
-                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>Événements tactiles</div>
-              </div>
-              <div style={{ textAlign: 'center', padding: '16px', background: 'rgba(34,211,238,0.08)', borderRadius: '14px', minWidth: '120px' }}>
-                <div style={{ fontSize: '32px', marginBottom: '8px' }}>🖥️</div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#f1f5f9' }}>PC</div>
-                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>Serveur Python</div>
-              </div>
-            </div>
-            <div style={{
-              marginTop: '24px', padding: '14px',
-              background: 'rgba(0,0,0,0.3)', borderRadius: '10px',
-              fontSize: '13px', color: '#64748b', textAlign: 'center', lineHeight: 1.6,
-            }}>
-              📶 Les deux appareils doivent être sur le <strong style={{ color: '#94a3b8' }}>même réseau Wi-Fi</strong>.
-              Aucune connexion Internet requise.
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── About ─────────────────────────────────────────────────── */}
-      <section id="about" style={{ padding: '100px 24px', background: 'rgba(99,102,241,0.03)' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
-          <div style={{
-            display: 'inline-block',
-            background: 'rgba(99,102,241,0.1)',
-            border: '1px solid rgba(99,102,241,0.2)',
-            borderRadius: '50px',
-            padding: '4px 16px',
-            fontSize: '12px', color: '#818cf8', fontWeight: 600,
-            letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '16px',
-          }}>À propos du développeur</div>
-          <h2 style={{
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: 'clamp(28px, 5vw, 44px)',
-            fontWeight: 700, color: '#f1f5f9', lineHeight: 1.2, marginBottom: '48px',
-          }}>
-            Créé avec passion
-          </h2>
-
-          <div style={{
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px solid rgba(99,102,241,0.15)',
-            borderRadius: '28px',
-            padding: '48px',
+        <div
+          style={{
+            backgroundColor: '#111827',
+            border: '1px solid #1f293d',
+            borderRadius: '16px',
+            padding: '40px 32px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '24px',
-          }}>
-            {/* Avatar placeholder */}
-            <div style={{
-              width: '100px', height: '100px',
+            textAlign: 'center',
+            gap: '20px',
+          }}
+        >
+          {/* Avatar */}
+          <div
+            style={{
+              width: '110px',
+              height: '110px',
+              minWidth: '110px',
+              minHeight: '110px',
+              maxWidth: '110px',
+              maxHeight: '110px',
               borderRadius: '50%',
-              background: 'linear-gradient(135deg, #6366f1, #22d3ee)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '42px',
-              boxShadow: '0 0 40px rgba(99,102,241,0.4)',
-              border: '3px solid rgba(99,102,241,0.3)',
-            }}>
-              👨‍💻
-            </div>
+              overflow: 'hidden',
+              border: '3px solid #2563eb',
+              backgroundColor: '#172554',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
+            }}
+          >
+            <img
+              src="/pdp.jpg"
+              alt="Fabrice Faniry RANDT"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center',
+                display: 'block',
+              }}
+            />
+          </div>
 
-            <div>
-              <h3 style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: '26px', fontWeight: 700, color: '#f1f5f9', marginBottom: '6px',
-              }}>
-                Fabrice Faniry RANDT
-              </h3>
-              <p style={{ color: '#6366f1', fontSize: '15px', fontWeight: 500, marginBottom: '4px' }}>
-                Programmer · Ethical Hacker · Graphic Designer
-              </p>
-              <p style={{ color: '#64748b', fontSize: '14px' }}>
-                🏢 Eray Digital &nbsp;·&nbsp; 📍 Majunga, Maevatanana, Madagascar
-              </p>
-            </div>
-
-            <p style={{
-              color: '#94a3b8', fontSize: '15px', lineHeight: 1.8,
-              maxWidth: '560px',
-            }}>
-              AccesDistance est né d'un besoin simple : contrôler son PC depuis son téléphone sans logiciel payant.
-              Ce projet open source combine Python pour le serveur et Flutter pour l'application mobile,
-              le tout conçu pour être simple, rapide et entièrement privé.
+          <div>
+            <h3 style={{ fontSize: '24px', fontWeight: 800, color: '#f8fafc', marginBottom: '4px' }}>
+              Fabrice Faniry RANDT
+            </h3>
+            <p style={{ color: '#2563eb', fontSize: '15px', fontWeight: 600 }}>
+              Programmer · Ethical Hacker · Graphic Designer
             </p>
+            <p style={{ color: '#64748b', fontSize: '13px', marginTop: '6px' }}>
+              Antananarivo, Madagascar
+            </p>
+          </div>
 
-            {/* Social links */}
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-              {[
-                { label: 'GitHub', url: 'https://github.com/FabriceFaniry-RANDT4050', icon: <IconGitHub /> },
-                { label: 'Portfolio', url: 'https://fabrice-faniry-randt.vercel.app', icon: '🌐' },
-                { label: 'LinkedIn', url: 'https://linkedin.com/in/fabrice-faniry-randriamahatratra-8aa17271', icon: '💼' },
-                { label: 'Facebook', url: 'https://facebook.com/fabricefaniryrandt', icon: '📘' },
-              ].map(link => (
-                <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" style={{
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  color: '#94a3b8',
+          <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: 1.8, maxWidth: '600px' }}>
+            AccesDistance est un projet open source pensé pour offrir une alternative libre, rapide et 100% privée aux
+            logiciels de prise de contrôle distants. Conçu avec Python pour la couche serveur et Flutter pour l'application
+            mobile.
+          </p>
+
+          {/* Social links */}
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            {[
+              {
+                label: 'GitHub',
+                url: 'https://github.com/FabriceFaniry-RANDT4050',
+                icon: <Github size={16} />,
+              },
+              {
+                label: 'Portfolio',
+                url: 'https://fabrice-faniry-randt.vercel.app',
+                icon: <Globe size={16} />,
+              },
+              {
+                label: 'LinkedIn',
+                url: 'https://linkedin.com/in/fabrice-faniry-randriamahatratra-8aa17271',
+                icon: <Linkedin size={16} />,
+              },
+              {
+                label: 'Facebook',
+                url: 'https://facebook.com/fabricefaniryrandt',
+                icon: <Facebook size={16} />,
+              },
+              {
+                label: 'Email',
+                url: 'mailto:fahniryjklm@gmail.com',
+                icon: <Mail size={16} />,
+              },
+            ].map((link) => (
+              <a
+                key={link.label}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  backgroundColor: '#1e293b',
+                  color: '#f8fafc',
+                  border: '1px solid #1f293d',
                   padding: '10px 18px',
-                  borderRadius: '10px',
-                  textDecoration: 'none',
-                  fontSize: '14px',
+                  borderRadius: '8px',
+                  fontSize: '13px',
                   fontWeight: 500,
-                  transition: 'all 0.2s',
+                  textDecoration: 'none',
+                  transition: 'background-color 0.2s',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'; e.currentTarget.style.color = '#f1f5f9'; e.currentTarget.style.background = 'rgba(99,102,241,0.08)' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
-                >
-                  <span>{link.icon}</span>
-                  {link.label}
-                </a>
-              ))}
-            </div>
-
-            {/* Contact email */}
-            <div style={{
-              background: 'rgba(99,102,241,0.08)',
-              border: '1px solid rgba(99,102,241,0.2)',
-              borderRadius: '12px',
-              padding: '12px 20px',
-              fontSize: '14px',
-              color: '#818cf8',
-              display: 'flex', alignItems: 'center', gap: '8px',
-            }}>
-              📧 <a href="mailto:fahniryjklm@gmail.com" style={{ color: '#818cf8', textDecoration: 'none' }}>fahniryjklm@gmail.com</a>
-            </div>
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#2563eb')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#1e293b')}
+              >
+                {link.icon}
+                {link.label}
+              </a>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ── GitHub Repos ──────────────────────────────────────────── */}
-      <section style={{ padding: '60px 24px', maxWidth: '1200px', margin: '0 auto' }}>
-        <h3 style={{
-          fontFamily: "'Space Grotesk', sans-serif",
-          fontSize: '22px', fontWeight: 700, color: '#f1f5f9',
-          textAlign: 'center', marginBottom: '32px',
-        }}>
-          Dépôts GitHub
-        </h3>
-        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          {[
-            { label: 'Serveur Python', repo: SERVER_REPO, icon: '🖥️' },
-            { label: 'Application Android', repo: APP_REPO, icon: '📱' },
-          ].map(r => (
-            <a key={r.repo} href={`https://github.com/${r.repo}`} target="_blank" rel="noopener noreferrer" style={{
-              display: 'flex', alignItems: 'center', gap: '14px',
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: '16px',
-              padding: '20px 28px',
-              textDecoration: 'none',
-              transition: 'all 0.3s',
-              minWidth: '280px',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'; e.currentTarget.style.background = 'rgba(99,102,241,0.06)'; e.currentTarget.style.transform = 'translateY(-3px)' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.transform = 'translateY(0)' }}
-            >
-              <span style={{ fontSize: '28px' }}>{r.icon}</span>
-              <div>
-                <div style={{ fontSize: '15px', fontWeight: 600, color: '#f1f5f9', marginBottom: '2px' }}>{r.label}</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#818cf8', fontSize: '13px' }}>
-                  <IconGitHub />
-                  {r.repo}
-                  <IconExternalLink />
-                </div>
-              </div>
-            </a>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Footer ────────────────────────────────────────────────── */}
-      <footer style={{
-        borderTop: '1px solid rgba(255,255,255,0.06)',
-        padding: '32px 24px',
-        textAlign: 'center',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '12px' }}>
+      {/* ── Footer ────────────────────────────────────────────────────────── */}
+      <footer
+        style={{
+          borderTop: '1px solid #1f293d',
+          padding: '36px 24px',
+          textAlign: 'center',
+          backgroundColor: '#0b0f19',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '10px' }}>
           <img src="/accesdistance-logo.png" alt="logo" style={{ width: '28px', height: '28px', borderRadius: '6px' }} />
-          <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, color: '#f1f5f9' }}>
-            <span style={{ color: '#818cf8' }}>Acces</span>Distance
+          <span style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc' }}>
+            <span style={{ color: '#2563eb' }}>Acces</span>Distance
           </span>
         </div>
-        <p style={{ color: '#64748b', fontSize: '13px', lineHeight: 1.7 }}>
-          © {new Date().getFullYear()} Fabrice Faniry RANDT · Eray Digital · Open Source
+        <p style={{ color: '#64748b', fontSize: '13px', lineHeight: 1.6 }}>
+          © {new Date().getFullYear()} Fabrice Faniry RANDT · Master professionnel · Open Source
           <br />
-          Développé avec 💜 à Majunga, Madagascar
+          Développé à Madagascar
         </p>
       </footer>
-    </div>
-  )
-}
-
-// ─── Step Card sub-component ──────────────────────────────────────────────────
-function StepCard({ step }: { step: { step: string; title: string; color: string; content: React.ReactNode } }) {
-  const [open, setOpen] = useState(true)
-  return (
-    <div style={{
-      background: 'rgba(255,255,255,0.02)',
-      border: `1px solid rgba(255,255,255,0.06)`,
-      borderRadius: '20px',
-      overflow: 'hidden',
-      transition: 'border-color 0.3s',
-    }}
-    onMouseEnter={e => { e.currentTarget.style.borderColor = `${step.color}30` }}
-    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)' }}
-    >
-      <button onClick={() => setOpen(!open)} style={{
-        width: '100%', display: 'flex', alignItems: 'center', gap: '16px',
-        padding: '24px 28px',
-        background: 'transparent', border: 'none', cursor: 'pointer',
-        textAlign: 'left',
-        fontFamily: "'Inter', sans-serif",
-      }}>
-        <div style={{
-          width: '44px', height: '44px', flexShrink: 0,
-          background: `${step.color}20`,
-          border: `2px solid ${step.color}50`,
-          borderRadius: '12px',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: "'Space Grotesk', sans-serif",
-          fontSize: '16px', fontWeight: 800, color: step.color,
-          transition: 'transform 0.3s',
-        }} className="step-icon">
-          {step.step}
-        </div>
-        <span style={{ fontSize: '17px', fontWeight: 600, color: '#f1f5f9', flex: 1 }}>{step.title}</span>
-        <div style={{ color: '#64748b', transform: open ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }}>
-          <IconChevronDown />
-        </div>
-      </button>
-      {open && (
-        <div style={{ padding: '0 28px 28px' }}>
-          {step.content}
-        </div>
-      )}
     </div>
   )
 }
