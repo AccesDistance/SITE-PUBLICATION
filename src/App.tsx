@@ -24,15 +24,20 @@ import {
   Mouse,
   Move,
   ArrowUpDown,
-  Cpu,
+
   Globe,
   Mail,
-  Maximize2,
+
   Keyboard,
   Layers,
   Copy,
   Check,
   Radio,
+  Lock,
+  KeyRound,
+  ShieldAlert,
+  Gauge,
+
 } from 'lucide-react'
 
 // Brand Icons
@@ -76,11 +81,11 @@ const APP_REPO = 'AccesDistance/APPLICATION-MOBILE'
 
 // Direct download fallbacks with solid direct URLs
 const DEFAULT_SERVER_RELEASE: Release = {
-  tag_name: 'v1.1.1',
-  name: 'Release v1.1.1',
+  tag_name: 'v2.0.0',
+  name: 'Release v2.0.0 (Chiffrement AES-256 & Sécurité)',
   published_at: new Date().toISOString(),
   html_url: `https://github.com/${SERVER_REPO}/releases/latest`,
-  body: 'Version multiplateforme avec optimisation de flux vidéo JPEG 60 FPS et écoute UDP réactive.',
+  body: 'Mise à jour majeure v2.0 :\n• Chiffrement symétrique AES-256-GCM sur le flux TCP vidéo et handshake résolution.\n• Authentification cryptographique HMAC-SHA256 sur tous les paquets UDP tactiles.\n• Handshake TCP challenge-response avec clé secrète pré-partagée (PSK).\n• Protection anti-DDoS avec rate limiting (60 req/s/IP) et bannissement automatique IP (300s).\n• Suivi des appareils par Device ID persistant dans devices.json.\n• Validation stricte des commandes par liste blanche.\n• Journalisation structurée quotidienne sur 30 jours (logs/server.log).',
   assets: [
     {
       name: 'server-windows.exe',
@@ -101,11 +106,11 @@ const DEFAULT_SERVER_RELEASE: Release = {
 }
 
 const DEFAULT_APP_RELEASE: Release = {
-  tag_name: 'v1.1.1',
-  name: 'Release v1.1.1',
+  tag_name: 'v2.0.0',
+  name: 'Release v2.0.0 (Sécurité AES-256, Splash & Docs)',
   published_at: new Date().toISOString(),
   html_url: `https://github.com/${APP_REPO}/releases/latest`,
-  body: 'Application mobile Flutter avec contrôles tactiles fluides, clavier virtuel et mode plein écran.',
+  body: 'Mise à jour majeure v2.0 de l\'APK :\n• Écran de démarrage animé (Splash Screen) avec logo et halo lumineux.\n• Module de sécurité complet avec chiffrement AES-256-GCM via PointyCastle.\n• Signature HMAC-SHA256 avec numéro de séquence anti-rejeu sur les actions tactiles.\n• Génération et persistance d\'un Device ID unique (UUID v4) basé sur le matériel Android.\n• Vérificateur de mises à jour intégré avec téléchargement direct d\'APK et artefacts GitHub Actions.\n• Page interactive de documentation et guide réseau étape par étape.\n• Page À propos du développeur avec liens vers portfolio et réseaux.\n• Dialogue de gestion de la sécurité et clé PSK.',
   assets: [
     {
       name: 'app-release.apk',
@@ -648,11 +653,8 @@ export default function App() {
             {[
               { id: 'home', label: 'Accueil' },
               { id: 'features', label: 'Fonctionnalités' },
-              { id: 'gestures', label: 'Tactile' },
-              { id: 'showcase', label: 'Aperçu' },
               { id: 'downloads', label: 'Téléchargements' },
               { id: 'docs', label: 'Documentation' },
-              { id: 'about', label: 'Développeur' },
             ].map((link) => (
               <button
                 key={link.id}
@@ -727,15 +729,15 @@ export default function App() {
               backgroundColor: '#111827',
               border: '1px solid #1f293d',
               borderRadius: '30px',
-              padding: '6px 16px',
+              padding: '6px 18px',
               fontSize: '13px',
-              color: '#3b82f6',
+              color: '#f8fafc',
               fontWeight: 600,
               marginBottom: '28px',
             }}
           >
-            <Zap size={14} color="#2563eb" />
-            Contrôle PC sans latence via Wi-Fi Local · Open Source
+            <ShieldCheck size={15} color="#10b981" />
+            <span style={{ color: '#10b981', fontWeight: 700 }}>v2.0 Sécurisée</span> · Chiffrement AES-256-GCM & Signature HMAC · Wi-Fi Local 60 FPS
           </motion.div>
 
 
@@ -752,7 +754,7 @@ export default function App() {
               marginBottom: '20px',
             }}
           >
-            Contrôlez votre PC depuis votre smartphone
+            Contrôlez votre PC depuis votre smartphone en toute sécurité
           </motion.h1>
 
           <motion.p
@@ -768,8 +770,9 @@ export default function App() {
               margin: '0 auto 36px',
             }}
           >
-            AccesDistance transforme votre téléphone Android en un pavé tactile ultra-réactif avec affichage direct de
-            l'écran de votre ordinateur en temps réel.
+            AccesDistance transforme votre smartphone Android en un pavé tactile ultra-réactif avec affichage direct de
+            l'écran de votre ordinateur en 60 FPS. Désormais protégé par un chiffrement de bout en bout AES-256-GCM, une
+            authentification HMAC-SHA256 et un système anti-DDoS.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -800,7 +803,7 @@ export default function App() {
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#2563eb')}
             >
               <Download size={18} />
-              Télécharger l'APK & Serveur
+              Télécharger l'APK & Serveur v2.0
             </button>
             <button
               type="button"
@@ -823,7 +826,7 @@ export default function App() {
               onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#1f293d')}
             >
               <Terminal size={18} color="#3b82f6" />
-              Guide d'utilisation
+              Guide & Sécurité PSK
             </button>
           </motion.div>
 
@@ -831,16 +834,18 @@ export default function App() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
               gap: '16px',
               marginTop: '60px',
             }}
           >
             {[
-              { label: 'Wi-Fi Local', desc: 'Sans Internet', icon: <Wifi size={18} color="#3b82f6" /> },
-              { label: '60 FPS', desc: 'Compression JPEG', icon: <Monitor size={18} color="#3b82f6" /> },
-              { label: 'UDP & TCP', desc: 'Faible latence', icon: <Zap size={18} color="#3b82f6" /> },
-              { label: '100% Privé', desc: 'Aucun serveur cloud', icon: <ShieldCheck size={18} color="#3b82f6" /> },
+              { label: 'Chiffré AES-256', desc: 'Flux vidéo protégé GCM', icon: <Lock size={18} color="#10b981" /> },
+              { label: 'Auth HMAC-SHA256', desc: 'Paquets tactiles signés', icon: <KeyRound size={18} color="#3b82f6" /> },
+              { label: 'Anti-DDoS & Bruteforce', desc: 'Rate limit & ban auto', icon: <ShieldAlert size={18} color="#f59e0b" /> },
+              { label: 'Wi-Fi Local', desc: '100% Hors-Ligne & Privé', icon: <Wifi size={18} color="#3b82f6" /> },
+              { label: 'Device ID Unique', desc: 'UUID matériel persistant', icon: <Smartphone size={18} color="#8b5cf6" /> },
+              { label: '60 FPS Fluide', desc: 'Compression JPEG adaptative', icon: <Monitor size={18} color="#3b82f6" /> },
             ].map((item, idx) => (
               <div
                 key={idx}
@@ -881,47 +886,57 @@ export default function App() {
               letterSpacing: '1px',
             }}
           >
-            ARCHITECTURE TECHNIQUE
+            ARCHITECTURE TECHNIQUE & SÉCURITÉ v2.0
           </span>
           <h2 style={{ fontSize: '32px', fontWeight: 800, color: '#f8fafc', marginTop: '8px' }}>
-            Performances et simplicité
+            Performance, fluidité et sécurité absolue
           </h2>
           <p style={{ color: '#94a3b8', fontSize: '15px', marginTop: '8px' }}>
-            Une solution pensée pour être ultra-rapide sur votre réseau domestique ou professionnel.
+            Une solution pensée pour être ultra-rapide sur votre réseau local avec une défense en profondeur contre toute intrusion.
           </p>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
           {[
             {
-              icon: <Monitor size={22} color="#3b82f6" />,
-              title: 'Flux d\'écran haute vitesse',
-              desc: 'Capture optimisée MSS + OpenCV en boucle continue, encodée en JPEG avec ajustement dynamique de la qualité.',
+              icon: <Lock size={22} color="#10b981" />,
+              title: 'Chiffrement symétrique AES-256-GCM',
+              desc: 'Toutes les trames vidéo JPEG et la négociation d\'écran TCP sont chiffrées avec un nonce dynamique de 12 octets et une clé de 256 bits via cryptography (Python) et PointyCastle (Dart).',
             },
             {
-              icon: <MousePointerClick size={22} color="#3b82f6" />,
-              title: 'Dual-Socket TCP & UDP',
-              desc: 'Le flux vidéo passe par TCP (port 9999) et les actions tactiles passent par UDP (port 9998) pour éliminer les retards.',
+              icon: <KeyRound size={22} color="#3b82f6" />,
+              title: 'Signature HMAC-SHA256 & Anti-Rejeu',
+              desc: 'Chaque commande tactile UDP transporte un compteur séquentiel (uint32) et une empreinte cryptographique. Toute tentative d\'injection ou de rejeu est rejetée immédiatement.',
             },
             {
-              icon: <Keyboard size={22} color="#3b82f6" />,
-              title: 'Clavier & Presse-papier',
-              desc: 'Frappe de texte fluide avec gestion automatique des caractères accentués via le presse-papier sécurisé.',
+              icon: <ShieldAlert size={22} color="#f59e0b" />,
+              title: 'Protection Anti-DDoS & IP Blocker',
+              desc: 'RateLimiter glissant limitant le débit à 60 événements/s/IP et bannissement automatique pendant 300 secondes après 5 tentatives infructueuses de connexion.',
             },
             {
-              icon: <Maximize2 size={22} color="#3b82f6" />,
-              title: 'Mode Immersif Plein Écran',
-              desc: 'Affiche la totalité de l\'écran de votre PC sur votre smartphone sans bandes noires parasites.',
+              icon: <Smartphone size={22} color="#8b5cf6" />,
+              title: 'Device ID matériel persistant',
+              desc: 'L\'APK génère un identifiant unique (UUID v4) issu du matériel Android. Chaque appareil est consigné dans devices.json avec l\'historique de ses adresses IP et de ses sessions.',
             },
             {
-              icon: <Cpu size={22} color="#3b82f6" />,
-              title: 'Serveur multiplateforme',
-              desc: 'Compatible nativement avec Windows (.exe autonome), Linux et macOS sans installation de dépendances lourdes.',
+              icon: <Gauge size={22} color="#ec4899" />,
+              title: 'Nouvelle expérience mobile v2.0',
+              desc: 'Écran de chargement animé (Splash Screen), vérification intégrée des mises à jour APK en un clic, guide interactif et dialogue de configuration rapide de la clé PSK.',
             },
             {
-              icon: <ShieldCheck size={22} color="#3b82f6" />,
-              title: 'Zéro collecte de données',
-              desc: 'Toutes les communications restent strictement cantonnées à votre routeur Wi-Fi local.',
+              icon: <Terminal size={22} color="#3b82f6" />,
+              title: 'Validation stricte & Logs structurés',
+              desc: 'Filtrage rigoureux par liste blanche des commandes et coordonnées [0.0, 1.0], couplé à une journalisation rotative sur 30 jours (logs/server.log).',
+            },
+            {
+              icon: <Zap size={22} color="#3b82f6" />,
+              title: 'Dual-Socket TCP & UDP optimisé',
+              desc: 'Le flux d\'écran haute vitesse transite par TCP (port 9999) et les actions tactiles passent par UDP (port 9998) pour éliminer les retards de buffering.',
+            },
+            {
+              icon: <Wifi size={22} color="#10b981" />,
+              title: '100% Hors-Ligne & Données Privées',
+              desc: 'Toutes les communications restent cantonnées à votre réseau Wi-Fi local sans aucun serveur externe, ni télémétrie, ni dépendance Internet.',
             },
           ].map((card, i) => (
             <motion.div
@@ -1034,6 +1049,22 @@ export default function App() {
             backTitle="Suivi temps réel"
             backDesc="Le curseur de la souris du PC suit fidèlement la position de votre doigt en coordonnées plein écran."
             action="MOVE,0.724,0.339"
+          />
+          <FlipCard
+            title="Paquet UDP Signé"
+            subtitle="Signature HMAC-SHA256"
+            icon={<Lock size={22} />}
+            backTitle="Protection anti-injection & rejeu"
+            backDesc="Chaque commande tactile transporte un ID séquentiel uint32 et une signature de 16 octets. Toute altération est immédiatement bloquée."
+            action="[4 seq_id][16 hmac][payload]"
+          />
+          <FlipCard
+            title="Handshake TCP & PSK"
+            subtitle="Authentification mutuelle"
+            icon={<KeyRound size={22} />}
+            backTitle="Challenge-Response cryptographique"
+            backDesc="Le serveur émet un défi de 32 octets. L'APK répond par HMAC-SHA256 et son Device ID matériel avant d'activer le streaming vidéo."
+            action="Challenge(32) -> Response(68) -> OK"
           />
         </div>
       </section>
@@ -1243,6 +1274,86 @@ export default function App() {
               <span style={{ fontSize: '12px', color: '#2563eb', fontWeight: 600 }}>192.168.x.x / 10.x.x.x</span>
             </div>
           </SwiperSlide>
+
+          <SwiperSlide>
+            <div
+              style={{
+                backgroundColor: '#111827',
+                border: '1px solid #1f293d',
+                borderRadius: '16px',
+                padding: '28px',
+                height: '320px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    backgroundColor: '#064e3b',
+                    borderRadius: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#10b981',
+                    marginBottom: '16px',
+                  }}
+                >
+                  <Lock size={24} />
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#f8fafc', marginBottom: '8px' }}>
+                  5. Chiffrement Fort AES-256-GCM
+                </h3>
+                <p style={{ fontSize: '14px', color: '#94a3b8', lineHeight: 1.6 }}>
+                  Le flux vidéo complet et les commandes sont verrouillés par cryptographie symétrique et signatures HMAC-SHA256, garantissant une confidentialité totale sur le LAN.
+                </p>
+              </div>
+              <span style={{ fontSize: '12px', color: '#10b981', fontWeight: 600 }}>AES-256-GCM · HMAC-SHA256 · Clé PSK</span>
+            </div>
+          </SwiperSlide>
+
+          <SwiperSlide>
+            <div
+              style={{
+                backgroundColor: '#111827',
+                border: '1px solid #1f293d',
+                borderRadius: '16px',
+                padding: '28px',
+                height: '320px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    backgroundColor: '#4c1d95',
+                    borderRadius: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#a78bfa',
+                    marginBottom: '16px',
+                  }}
+                >
+                  <Gauge size={24} />
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#f8fafc', marginBottom: '8px' }}>
+                  6. Interface Mobile v2.0 Enrichie
+                </h3>
+                <p style={{ fontSize: '14px', color: '#94a3b8', lineHeight: 1.6 }}>
+                  Découvrez le nouvel écran de chargement animé, la vérification directe des mises à jour APK et le guide de documentation intégré au creux de votre main.
+                </p>
+              </div>
+              <span style={{ fontSize: '12px', color: '#a78bfa', fontWeight: 600 }}>Splash Screen · Update Checker · Docs</span>
+            </div>
+          </SwiperSlide>
         </Swiper>
       </section>
 
@@ -1333,12 +1444,12 @@ export default function App() {
           <AccordionItem
             id="step-1"
             step="01"
-            title="Lancer le serveur sur votre PC"
+            title="Lancer le serveur PC & Génération de la clé PSK"
             isOpen={openDocStep === '01'}
             onToggle={() => setOpenDocStep(openDocStep === '01' ? '' : '01')}
           >
             <p style={{ marginBottom: '14px' }}>
-              Téléchargez l'exécutable pour votre système d'exploitation ci-dessus, puis lancez-le simplement :
+              Téléchargez l'exécutable ci-dessus ou lancez le script Python sur votre PC. Au premier lancement, une clé secrète cryptographique est automatiquement générée dans le fichier <code style={{ color: '#10b981', backgroundColor: '#0b0f19', padding: '2px 6px', borderRadius: '4px' }}>accesdistance.key</code> :
             </p>
             <div
               style={{
@@ -1355,7 +1466,7 @@ export default function App() {
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: '#64748b' }}># Windows (Double-clic ou Invite de commandes)</span>
+                <span style={{ color: '#64748b' }}># Windows / Linux / macOS (Terminal ou Double-clic)</span>
                 <button
                   type="button"
                   onClick={handleCopyCommand}
@@ -1376,19 +1487,20 @@ export default function App() {
                   {copiedIp ? 'Copié !' : 'Copier'}
                 </button>
               </div>
-              <span style={{ color: '#3b82f6' }}>&gt; server-windows.exe</span>
+              <span style={{ color: '#3b82f6' }}>&gt; python server.py</span>
               <div style={{ color: '#64748b', margin: '4px 0' }}>──────────────────────────────────────────</div>
-              <span style={{ color: '#f8fafc' }}>SERVEUR D'ÉCRAN TACTILE ET AFFICHAGE DISTANT</span>
+              <span style={{ color: '#f8fafc', fontWeight: 700 }}>ACCESDISTANCE — SERVEUR SÉCURISÉ v2.0</span>
               <span style={{ color: '#3b82f6' }}>-&gt; Adresse IP du PC : 192.168.1.50</span>
-              <span style={{ color: '#94a3b8' }}>-&gt; Port Stream Vidéo (TCP) : 9999</span>
-              <span style={{ color: '#94a3b8' }}>-&gt; Port Tactile / Souris (UDP) : 9998</span>
+              <span style={{ color: '#94a3b8' }}>-&gt; Port Stream Vidéo (TCP) : 9999 [Chiffré AES-256-GCM]</span>
+              <span style={{ color: '#94a3b8' }}>-&gt; Port Tactile / Souris (UDP) : 9998 [Signé HMAC-SHA256]</span>
+              <span style={{ color: '#10b981' }}>-&gt; Clé PSK générée : accesdistance.key (64 caractères hex)</span>
             </div>
           </AccordionItem>
 
           <AccordionItem
             id="step-2"
             step="02"
-            title="Installer l'application sur votre smartphone"
+            title="Installer l'application mobile APK v2.0"
             isOpen={openDocStep === '02'}
             onToggle={() => setOpenDocStep(openDocStep === '02' ? '' : '02')}
           >
@@ -1396,21 +1508,39 @@ export default function App() {
               Transférez le fichier <code style={{ color: '#3b82f6', backgroundColor: '#0b0f19', padding: '2px 6px', borderRadius: '4px' }}>app-release.apk</code> sur votre téléphone et procédez à l'installation :
             </p>
             <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li>Autorisez l'installation des applications depuis des sources inconnues si Android le requiert.</li>
-              <li>Ouvrez l'application <strong>AccesDistance</strong>.</li>
-              <li>Assurez-vous que votre téléphone est bien connecté au <strong>même réseau Wi-Fi</strong> que votre PC.</li>
+              <li>Autorisez l'installation depuis des sources inconnues dans les paramètres de sécurité Android si nécessaire.</li>
+              <li>Ouvrez l'application <strong>AccesDistance</strong> et découvrez le nouvel écran de chargement animé.</li>
+              <li>Vérifiez que votre téléphone et votre PC sont connectés au <strong>même réseau Wi-Fi local</strong>.</li>
             </ul>
           </AccordionItem>
 
           <AccordionItem
             id="step-3"
             step="03"
-            title="Se connecter et prendre le contrôle"
+            title="Sécuriser la liaison avec la clé PSK (Recommandé)"
             isOpen={openDocStep === '03'}
             onToggle={() => setOpenDocStep(openDocStep === '03' ? '' : '03')}
           >
             <p style={{ marginBottom: '14px' }}>
-              Dans l'application, saisissez l'adresse IP affichée dans la console de votre serveur (exemple : <code style={{ color: '#3b82f6', backgroundColor: '#0b0f19', padding: '2px 6px', borderRadius: '4px' }}>192.168.1.50</code>) et appuyez sur <strong>Se connecter</strong>.
+              Pour activer le chiffrement fort de bout en bout et l'authentification cryptographique :
+            </p>
+            <ol style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <li>Ouvrez le fichier <code style={{ color: '#10b981', backgroundColor: '#0b0f19', padding: '2px 6px', borderRadius: '4px' }}>accesdistance.key</code> créé dans le dossier de votre serveur sur le PC.</li>
+              <li>Copiez la chaîne hexadécimale de 64 caractères.</li>
+              <li>Dans l'application mobile, appuyez sur le bouton <strong>Sécurité & Clé PSK</strong> sur l'accueil.</li>
+              <li>Collez la clé et appuyez sur <strong>Enregistrer</strong>. Le badge d'état devient vert : <span style={{ color: '#10b981', fontWeight: 600 }}>Chiffrement AES-256 Actif ✅</span>.</li>
+            </ol>
+          </AccordionItem>
+
+          <AccordionItem
+            id="step-4"
+            step="04"
+            title="Se connecter et prendre le contrôle en temps réel"
+            isOpen={openDocStep === '04'}
+            onToggle={() => setOpenDocStep(openDocStep === '04' ? '' : '04')}
+          >
+            <p style={{ marginBottom: '14px' }}>
+              Saisissez l'adresse IP du PC (exemple : <code style={{ color: '#3b82f6', backgroundColor: '#0b0f19', padding: '2px 6px', borderRadius: '4px' }}>192.168.1.50</code>) et touchez <strong>Se connecter</strong>.
             </p>
             <div
               style={{
@@ -1419,15 +1549,29 @@ export default function App() {
                 borderRadius: '8px',
                 padding: '12px 16px',
                 fontSize: '13px',
-                color: '#3b82f6',
+                color: '#10b981',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
               }}
             >
               <CheckCircle2 size={16} />
-              <span>L'affichage de l'écran et la prise de contrôle sont instantanés !</span>
+              <span>Le handshake d'authentification challenge-response s'effectue automatiquement en moins d'une seconde !</span>
             </div>
+          </AccordionItem>
+
+          <AccordionItem
+            id="step-5"
+            step="05"
+            title="Dépannage, Pare-feu Windows & Mises à jour"
+            isOpen={openDocStep === '05'}
+            onToggle={() => setOpenDocStep(openDocStep === '05' ? '' : '05')}
+          >
+            <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <li><strong>Pare-feu Windows :</strong> Autorisez les ports 9999 (TCP flux vidéo) et 9998 (UDP commandes) si la connexion ne s'établit pas.</li>
+              <li><strong>Système anti-bruteforce :</strong> Après 5 échecs consécutifs d'authentification, l'IP est bannie 300 secondes. Patientez ou vérifiez la clé dans <code style={{ color: '#10b981', backgroundColor: '#0b0f19', padding: '2px 6px', borderRadius: '4px' }}>accesdistance.key</code>.</li>
+              <li><strong>Mise à jour intégrée :</strong> Utilisez le bouton "Mise à jour APK" sur l'écran d'accueil pour vérifier et télécharger les nouvelles versions directement sans passer par un navigateur.</li>
+            </ul>
           </AccordionItem>
         </div>
       </section>
