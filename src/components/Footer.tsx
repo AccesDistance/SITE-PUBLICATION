@@ -7,7 +7,7 @@ export const Footer: React.FC = () => {
         <img
           src="/accesdistance-logo.png"
           alt="AccesDistance Logo"
-          className="w-6 h-6 sm:w-7 sm:h-7 rounded-md"
+          className="w-6 h-6 sm:w-7 sm:h-7 rounded-xs"
         />
         <span className="text-sm sm:text-base font-bold text-white tracking-tight">
           <span className="text-blue-500">Acces</span>Distance

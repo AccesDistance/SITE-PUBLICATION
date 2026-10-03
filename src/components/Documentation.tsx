@@ -44,7 +44,7 @@ export const Documentation: React.FC = () => {
             Le serveur configure automatiquement le chiffrement AES-256-GCM et copie la clé prête à l'emploi dans votre presse-papier :
           </p>
 
-          <div className="bg-[#0b0f19] rounded-xl p-3.5 sm:p-4 font-mono text-xs sm:text-sm border border-[#1f293d] text-slate-300 flex flex-col gap-2 overflow-x-auto shadow-inner">
+          <div className="bg-[#0b0f19] rounded-xs p-3.5 sm:p-4 font-mono text-xs sm:text-sm border border-[#1f293d] text-slate-300 flex flex-col gap-2 overflow-x-auto shadow-inner">
             <div className="flex justify-between items-center pb-2 border-b border-[#1f293d]/60">
               <span className="text-slate-500 text-[11px] sm:text-xs">
                 # Windows / Linux / macOS (Double-clic ou Terminal)
@@ -103,7 +103,7 @@ export const Documentation: React.FC = () => {
           isOpen={openDocStep === '03'}
           onToggle={() => toggleStep('03')}
         >
-          <div className="p-3 bg-emerald-950/40 border border-emerald-800/40 rounded-xl mb-3 text-emerald-300 flex items-start gap-2.5">
+          <div className="p-3 bg-emerald-950/40 border border-emerald-800/40 rounded-xs mb-3 text-emerald-300 flex items-start gap-2.5">
             <CheckCircle2 size={18} className="shrink-0 mt-0.5 text-emerald-400" />
             <div>
               <strong>Zéro manipulation technique requise :</strong> Le chiffrement AES-256-GCM et les signatures HMAC-SHA256 fonctionnent <strong>immédiatement dès le premier lancement</strong> sans rien avoir à copier ou coller !
@@ -144,7 +144,7 @@ export const Documentation: React.FC = () => {
             </code>
             ) et touchez <strong>Se connecter</strong>.
           </p>
-          <div className="bg-[#0b0f19] border border-emerald-900/40 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-emerald-400 flex items-center gap-3">
+          <div className="bg-[#0b0f19] border border-emerald-900/40 rounded-xs p-3 sm:p-4 text-xs sm:text-sm text-emerald-400 flex items-center gap-3">
             <CheckCircle2 size={18} className="shrink-0" />
             <span>Le handshake challenge-response s'effectue automatiquement en moins d'une seconde !</span>
           </div>

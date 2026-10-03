@@ -100,11 +100,11 @@ export const Features: React.FC = () => {
             key={i}
             whileHover={{ y: -4 }}
             transition={{ duration: 0.2 }}
-            className={`bg-[#111827] border ${card.border} rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-all duration-200 shadow-sm hover:bg-[#162032]`}
+            className={`bg-[#111827] border ${card.border} rounded-xs p-5 sm:p-6 flex flex-col justify-between transition-all duration-200 shadow-sm hover:bg-[#162032]`}
           >
             <div>
               <div className="flex items-center justify-between mb-4">
-                <div className="w-11 h-11 rounded-xl bg-[#172554] flex items-center justify-center">
+                <div className="w-11 h-11 rounded-xs bg-[#172554] flex items-center justify-center">
                   {card.icon}
                 </div>
                 <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${card.badgeColor}`}>

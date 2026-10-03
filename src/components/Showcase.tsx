@@ -98,10 +98,10 @@ export const Showcase: React.FC = () => {
         >
           {slides.map((slide, index) => (
             <SwiperSlide key={index}>
-              <div className="bg-[#111827] border border-[#1f293d] rounded-2xl p-6 sm:p-7 h-[300px] sm:h-[320px] flex flex-col justify-between shadow-sm hover:border-blue-500/30 transition-colors">
+              <div className="bg-[#111827] border border-[#1f293d] rounded-xs p-6 sm:p-7 h-[300px] sm:h-[320px] flex flex-col justify-between shadow-sm hover:border-blue-500/30 transition-colors">
                 <div>
                   <div
-                    className={`w-12 h-12 rounded-xl ${slide.iconBg} flex items-center justify-center mb-5`}
+                    className={`w-12 h-12 rounded-xs ${slide.iconBg} flex items-center justify-center mb-5`}
                   >
                     {slide.icon}
                   </div>

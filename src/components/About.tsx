@@ -42,7 +42,7 @@ export const About: React.FC = () => {
         </h2>
       </div>
 
-      <div className="bg-[#111827] border border-[#1f293d] rounded-2xl p-6 sm:p-10 flex flex-col items-center text-center gap-5 shadow-lg">
+      <div className="bg-[#111827] border border-[#1f293d] rounded-xs p-6 sm:p-10 flex flex-col items-center text-center gap-5 shadow-lg">
         {/* Avatar */}
         <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-3 border-blue-600 bg-[#172554] shadow-xl shrink-0">
           <img
@@ -78,7 +78,7 @@ export const About: React.FC = () => {
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 bg-[#1e293b] hover:bg-blue-600 text-slate-200 hover:text-white border border-[#1f293d] px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-colors"
+              className="flex items-center gap-2 bg-[#1e293b] hover:bg-blue-600 text-slate-200 hover:text-white border border-[#1f293d] px-3.5 py-2 rounded-xs text-xs sm:text-sm font-medium transition-colors"
             >
               {link.icon}
               <span>{link.label}</span>

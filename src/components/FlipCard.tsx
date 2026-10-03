@@ -37,7 +37,7 @@ export const FlipCard: React.FC<FlipCardProps> = ({
         {/* Front Face */}
         <div className="flip-card-front bg-[#111827] border border-[#1f293d] hover:border-blue-500/40 p-5 sm:p-6 flex flex-col justify-between transition-colors shadow-sm">
           <div className="flex items-start justify-between">
-            <div className="w-11 h-11 bg-[#172554] text-blue-400 rounded-xl flex items-center justify-center">
+            <div className="w-11 h-11 bg-[#172554] text-blue-400 rounded-xs flex items-center justify-center">
               {icon}
             </div>
             <span className="text-[11px] font-semibold text-blue-400 bg-[#172554] border border-blue-900/30 px-2.5 py-1 rounded-full flex items-center gap-1">
@@ -63,7 +63,7 @@ export const FlipCard: React.FC<FlipCardProps> = ({
             <p className="text-xs text-slate-300 leading-relaxed line-clamp-4">{backDesc}</p>
           </div>
 
-          <div className="bg-[#0b0f19] px-3 py-2 rounded-lg border border-[#1f293d] text-[11px] sm:text-xs font-mono text-blue-400 flex items-center gap-2 overflow-hidden truncate">
+          <div className="bg-[#0b0f19] px-3 py-2 rounded-xs border border-[#1f293d] text-[11px] sm:text-xs font-mono text-blue-400 flex items-center gap-2 overflow-hidden truncate">
             <Terminal size={13} className="shrink-0" />
             <span className="truncate">{action}</span>
           </div>

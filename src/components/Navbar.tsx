@@ -23,7 +23,6 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection, onNavigate }) => 
   const navLinks = [
     { id: 'home', label: 'Accueil' },
     { id: 'features', label: 'Fonctionnalités' },
-
     { id: 'downloads', label: 'Téléchargements' },
     { id: 'docs', label: 'Documentation' },
   ]
@@ -45,7 +44,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection, onNavigate }) => 
           <img
             src="/accesdistance-logo.png"
             alt="Logo AccesDistance"
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl shadow-md border border-slate-700/50 group-hover:border-blue-500/50 transition-colors"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xs shadow-md border border-slate-700/50 group-hover:border-blue-500/50 transition-colors"
           />
           <span className="text-lg sm:text-xl font-extrabold text-white tracking-tight">
             <span className="text-blue-500">Acces</span>Distance
@@ -53,7 +52,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection, onNavigate }) => 
         </button>
 
         {/* Desktop Nav Items */}
-        <nav className="hidden lg:flex items-center gap-1.5 xl:gap-2 bg-[#111827]/70 border border-slate-800/80 rounded-xl p-1.5">
+        <nav className="hidden lg:flex items-center gap-1.5 xl:gap-2 p-1.5">
           {navLinks.map((link) => {
             const isActive = activeSection === link.id
             return (
@@ -61,7 +60,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection, onNavigate }) => 
                 key={link.id}
                 type="button"
                 onClick={() => handleLinkClick(link.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs xl:text-sm font-medium transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-xs text-xs xl:text-sm font-medium transition-all cursor-pointer ${
                   isActive
                     ? 'bg-blue-600 text-white font-semibold shadow-sm'
                     : 'text-slate-300 hover:text-white hover:bg-slate-800/70'
@@ -78,7 +77,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection, onNavigate }) => 
           <button
             type="button"
             onClick={() => handleLinkClick('downloads')}
-            className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-md shadow-blue-600/30 cursor-pointer hover:shadow-blue-600/50"
+            className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xs flex items-center gap-2 transition-all shadow-md shadow-blue-600/30 cursor-pointer hover:shadow-blue-600/50"
           >
             <Download size={16} />
             Télécharger
@@ -90,7 +89,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection, onNavigate }) => 
           <button
             type="button"
             onClick={() => handleLinkClick('downloads')}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer sm:hidden"
+            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded-xs flex items-center gap-1.5 transition-colors cursor-pointer sm:hidden"
           >
             <Download size={14} />
             APK
@@ -99,7 +98,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection, onNavigate }) => 
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label={mobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
-            className="p-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-[#1e293b] border border-slate-800 transition-colors focus:outline-none cursor-pointer"
+            className="p-2.5 rounded-xs text-slate-300 hover:text-white hover:bg-[#1e293b] border border-slate-800 transition-colors focus:outline-none cursor-pointer"
           >
             {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
@@ -117,7 +116,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection, onNavigate }) => 
                   key={link.id}
                   type="button"
                   onClick={() => handleLinkClick(link.id)}
-                  className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                  className={`w-full text-left px-4 py-3 rounded-xs text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-blue-600 text-white font-semibold'
                       : 'text-slate-300 hover:bg-[#162032] hover:text-white'
@@ -133,10 +132,10 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection, onNavigate }) => 
             <button
               type="button"
               onClick={() => handleLinkClick('downloads')}
-              className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 transition-colors cursor-pointer"
+              className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-semibold py-3 px-4 rounded-xs flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 transition-colors cursor-pointer"
             >
               <Download size={17} />
-              Télécharger l'APK & Serveur v2.0
+              Télécharger l'APK & Serveur
             </button>
           </div>
         </div>

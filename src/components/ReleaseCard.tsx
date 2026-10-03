@@ -21,11 +21,11 @@ export const ReleaseCard: React.FC<ReleaseCardProps> = ({ release, type, repo })
   const isServer = type === 'server'
 
   return (
-    <div className="bg-[#111827] border border-[#1f293d] rounded-2xl p-5 sm:p-6 flex flex-col gap-5 shadow-sm">
+    <div className="bg-[#111827] border border-[#1f293d] rounded-xs p-5 sm:p-6 flex flex-col gap-5 shadow-sm">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-[#1f293d]/80">
         <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 bg-[#172554] text-blue-400 rounded-xl flex items-center justify-center shrink-0">
+          <div className="w-11 h-11 bg-[#172554] text-blue-400 rounded-xs flex items-center justify-center shrink-0">
             {isServer ? <Monitor size={22} /> : <Smartphone size={22} />}
           </div>
           <div>
@@ -50,7 +50,7 @@ export const ReleaseCard: React.FC<ReleaseCardProps> = ({ release, type, repo })
             target="_blank"
             rel="noopener noreferrer"
             title="Consulter les builds et artifacts de GitHub Actions"
-            className="flex items-center gap-1.5 bg-[#1e293b] hover:bg-blue-600 text-slate-300 hover:text-white text-xs font-medium px-3 py-1.5 rounded-lg border border-[#1f293d] transition-colors"
+            className="flex items-center gap-1.5 bg-[#1e293b] hover:bg-blue-600 text-slate-300 hover:text-white text-xs font-medium px-3 py-1.5 rounded-xs border border-[#1f293d] transition-colors"
           >
             <Radio size={13} />
             <span>Actions</span>
@@ -59,7 +59,7 @@ export const ReleaseCard: React.FC<ReleaseCardProps> = ({ release, type, repo })
             href={release.html_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 bg-[#1e293b] hover:bg-blue-600 text-slate-300 hover:text-white text-xs font-medium px-3 py-1.5 rounded-lg border border-[#1f293d] transition-colors"
+            className="flex items-center gap-1.5 bg-[#1e293b] hover:bg-blue-600 text-slate-300 hover:text-white text-xs font-medium px-3 py-1.5 rounded-xs border border-[#1f293d] transition-colors"
           >
             <GithubIcon size={13} />
             <span>Release</span>
@@ -90,7 +90,7 @@ export const ReleaseCard: React.FC<ReleaseCardProps> = ({ release, type, repo })
               <a
                 key={asset.name}
                 href={asset.browser_download_url}
-                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-4 px-4 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-md shadow-blue-600/20"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-4 px-4 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xs text-xs sm:text-sm font-semibold transition-all shadow-md shadow-blue-600/20"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <Download size={17} className="shrink-0" />
@@ -122,7 +122,7 @@ export const ReleaseCard: React.FC<ReleaseCardProps> = ({ release, type, repo })
             <span>{showNotes ? 'Masquer les notes de version' : 'Afficher les notes de version'}</span>
           </button>
           {showNotes && (
-            <div className="mt-3 p-3.5 bg-[#0b0f19] rounded-xl border border-[#1f293d] text-xs text-slate-300 leading-relaxed whitespace-pre-line overflow-x-auto">
+            <div className="mt-3 p-3.5 bg-[#0b0f19] rounded-xs border border-[#1f293d] text-xs text-slate-300 leading-relaxed whitespace-pre-line overflow-x-auto">
               {release.body}
             </div>
           )}

@@ -84,7 +84,7 @@ export default function App() {
 
       {/* Main Content Sections */}
       <main>
-        <Hero onNavigate={scrollTo} />
+        <Hero />
         <Features />
         <Gestures />
         <Showcase />
